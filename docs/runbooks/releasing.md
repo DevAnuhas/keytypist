@@ -57,5 +57,5 @@ Publish and verify the matching GitHub release assets **before** committing/push
 ## First release after the KeyWeave rename
 
 - Releases through 2.4.0 are KeyWeave builds with a different bundle identifier. Put a manual-install note in the release notes: KeyTypist is a new app with new data locations, permissions must be granted again, and nothing is migrated from KeyWeave.
-- Before publishing the feed, install the last KeyWeave build and confirm what Sparkle does with a KeyTypist update. Record the result in [FORK-IDENTITY.md](../FORK-IDENTITY.md); do not assume in-app update works across the identifier change.
+- KeyWeave 2.4.0 will only update in place to a release whose feed archive contains the app **named `KeyWeave.app`** (see the tested results in [FORK-IDENTITY.md](../FORK-IDENTITY.md)). An archive containing only `KeyTypist.app` fails for those users with error 4005. Until the release tooling produces that archive, treat the first KeyTypist release as a manual install and say so in the notes. Re-run the in-place update with the real Developer ID, notarized archive before publishing the feed.
 - Use `--repo DevAnuhas/keytypist`. Existing releases may be retitled, but never re-upload or rename their signed assets.
