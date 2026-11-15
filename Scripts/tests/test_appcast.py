@@ -1,4 +1,5 @@
 import base64
+import hashlib
 import subprocess
 import sys
 import tempfile
@@ -9,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SIGNATURE = base64.b64encode(bytes(64)).decode()
 
 
-LEGACY_2_4_0 = "https://github.com/DevAnuhas/keyweave/releases/download/v2.4.0/KeyWeave-2.4.0-arm64.dmg"
+LEGACY_FEED_SHA256 = "496abc5192e7750e076e8aa0352fc04ae20e9c9a2dc88966020194f309b7b764"
 
 
 def feed(url=None, version="2.5.0", build="18"):
@@ -48,20 +49,38 @@ class AppcastTests(unittest.TestCase):
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn("matching KeyTypist release DMG", result.stderr)
 
-    def test_release_published_under_former_name_keeps_its_original_asset_url(self):
-        result = self.validate(feed(LEGACY_2_4_0, version="2.4.0", build="17"))
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("1 release", result.stdout)
-
-    def test_former_name_release_cannot_point_at_other_assets(self):
-        for url in [
-            "https://github.com/DevAnuhas/keyweave/releases/download/v2.4.0/KeyWeave-2.4.0-arm64.dmg?x=1",
-            "https://github.com/DevAnuhas/keyweave/releases/download/v2.4.0/KeyWeave-2.4.0-arm64.zip",
-            "https://github.com/nilava/TabType/releases/download/v2.4.0/TabType.dmg",
-        ]:
-            with self.subTest(url=url):
-                result = self.validate(feed(url, version="2.4.0", build="17"))
+    def test_keytypist_feed_never_lists_former_name_releases(self):
+        for version, build in [("2.4.0", "17"), ("2.5.0", "18")]:
+            url = f"https://github.com/DevAnuhas/keyweave/releases/download/v{version}/KeyWeave-{version}-arm64.dmg"
+            with self.subTest(version=version):
+                result = self.validate(feed(url, version=version, build=build))
                 self.assertNotEqual(result.returncode, 0)
+                self.assertIn("matching KeyTypist release DMG", result.stderr)
+
+    def test_keytypist_uses_its_own_feed_path(self):
+        sys.path.insert(0, str(ROOT / "Scripts"))
+        try:
+            import appcast
+        finally:
+            sys.path.pop(0)
+        self.assertEqual(appcast.FEED,
+                         "https://raw.githubusercontent.com/DevAnuhas/keytypist/main/Updates/keytypist-appcast.xml")
+        self.assertEqual(appcast.DEFAULT_OUTPUT, ROOT / "Updates/keytypist-appcast.xml")
+        self.assertNotEqual(appcast.DEFAULT_OUTPUT, appcast.LEGACY_FEED)
+
+    def test_legacy_keyweave_feed_is_frozen(self):
+        # Installed KeyWeave 2.4.0 reads this EdDSA-signed file; any edit breaks its signature.
+        digest = hashlib.sha256((ROOT / "Updates/appcast.xml").read_bytes()).hexdigest()
+        self.assertEqual(digest, LEGACY_FEED_SHA256)
+
+    def test_generation_refuses_to_write_the_frozen_legacy_feed(self):
+        before = (ROOT / "Updates/appcast.xml").read_bytes()
+        result = subprocess.run([sys.executable, str(ROOT / "Scripts/appcast.py"),
+                                 "--app", "/nonexistent.app", "--output", str(ROOT / "Updates/appcast.xml")],
+                                capture_output=True, text=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("frozen KeyWeave feed", result.stderr)
+        self.assertEqual((ROOT / "Updates/appcast.xml").read_bytes(), before)
 
     def test_unsigned_truncated_or_modified_metadata_is_rejected(self):
         for data in [feed().split("<!-- sparkle-signatures:")[0],

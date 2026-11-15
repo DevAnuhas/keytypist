@@ -48,7 +48,7 @@ Confirm GitHub's latest-release endpoint, anonymously download the assets, compa
 
 Sparkle 2.10.1 is pinned in `Package.swift`. The release build signs its helpers inside-out with the app's Developer ID. Checks run daily by default, can be disabled in About, and always require the user to install. System profiling and silent installation are disabled. Test-home runs do not start Sparkle.
 
-The app pins `Updates/appcast.xml` on this repository's `main` branch and the KeyTypist public EdDSA key. Both the feed and archive signatures are required; verification happens before archive extraction. The private signing key stays in the login Keychain under account `dev.anuhas.keyweave.sparkle`. On initial setup only, run the pinned distribution's `bin/generate_keys --account dev.anuhas.keyweave.sparkle`; commit only its public key. Do not replace an existing key casually or put private keys in the repository.
+The app pins `Updates/keytypist-appcast.xml` on this repository's `main` branch and the KeyTypist public EdDSA key. Both the feed and archive signatures are required; verification happens before archive extraction. The private signing key stays in the login Keychain under account `dev.anuhas.keyweave.sparkle`. On initial setup only, run the pinned distribution's `bin/generate_keys --account dev.anuhas.keyweave.sparkle`; commit only its public key. Do not replace an existing key casually or put private keys in the repository.
 
 `Scripts/release.sh` also generates the feed after notarization. `Scripts/appcast.py` verifies the app/DMG signatures and tickets, signs with the dedicated Keychain account, checks the enclosure signature and signed feed with Sparkle's tools, and atomically replaces the feed. A new release must increment both the version and integer build number. Feed changes must be re-signed; `.gitattributes` preserves their bytes. `--validate-feed` checks metadata only and does not replace cryptographic verification.
 
@@ -56,6 +56,7 @@ Publish and verify the matching GitHub release assets **before** committing/push
 
 ## First release after the KeyWeave rename
 
-- Releases through 2.4.0 are KeyWeave builds with a different bundle identifier. Put a manual-install note in the release notes: KeyTypist is a new app with new data locations, permissions must be granted again, and nothing is migrated from KeyWeave.
-- KeyWeave 2.4.0 will only update in place to a release whose feed archive contains the app **named `KeyWeave.app`** (see the tested results in [FORK-IDENTITY.md](../FORK-IDENTITY.md)). An archive containing only `KeyTypist.app` fails for those users with error 4005. Until the release tooling produces that archive, treat the first KeyTypist release as a manual install and say so in the notes. Re-run the in-place update with the real Developer ID, notarized archive before publishing the feed.
+- KeyTypist is a new app to macOS (new bundle identifier, storage and permissions), and KeyWeave 2.4.0 cannot update to it in place. Say so in the release notes: install KeyTypist manually, grant permissions again, nothing is migrated from KeyWeave.
+- Never add a KeyTypist release to `Updates/appcast.xml`. It is the frozen KeyWeave feed; the generator refuses it and a test pins its bytes. KeyWeave users should keep seeing "up to date". See [FORK-IDENTITY.md](../FORK-IDENTITY.md) for the tested reason.
+- `Scripts/appcast.py` creates `Updates/keytypist-appcast.xml` on the first release. Publish the release assets first, then commit the feed promptly: until it exists on `main`, a manual update check in KeyTypist fails with a download error.
 - Use `--repo DevAnuhas/keytypist`. Existing releases may be retitled, but never re-upload or rename their signed assets.

@@ -37,7 +37,7 @@
 	<key>SUEnableSystemProfiling</key>
 	<false/>
 	<key>SUFeedURL</key>
-	<string>https://raw.githubusercontent.com/DevAnuhas/keytypist/main/Updates/appcast.xml</string>
+	<string>https://raw.githubusercontent.com/DevAnuhas/keytypist/main/Updates/keytypist-appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>pc1gLnpongI0flX6p0FOVK509djxXgyrKN8rcMB4bRU=</string>
 	<key>SURequireSignedFeed</key>

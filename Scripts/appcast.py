@@ -15,19 +15,19 @@ import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parent.parent
 NS = "{http://www.andymatuschak.org/xml-namespaces/sparkle}"
-FEED = "https://raw.githubusercontent.com/DevAnuhas/keytypist/main/Updates/appcast.xml"
+FEED = "https://raw.githubusercontent.com/DevAnuhas/keytypist/main/Updates/keytypist-appcast.xml"
+DEFAULT_OUTPUT = ROOT / "Updates/keytypist-appcast.xml"
+# KeyWeave 2.4.0 and earlier read this signed file through the old repository URL. It is frozen:
+# listing a KeyTypist build there would make those clients fail with a confusing error, because
+# Sparkle cannot install an app with a different bundle identifier and filename (see FORK-IDENTITY.md).
+LEGACY_FEED = ROOT / "Updates/appcast.xml"
 KEY = "pc1gLnpongI0flX6p0FOVK509djxXgyrKN8rcMB4bRU="
 # Login-Keychain label that holds the Sparkle EdDSA private key. It predates the
 # KeyTypist rename; relabeling it would orphan the key, so it deliberately keeps the old name.
 ACCOUNT = "dev.anuhas.keyweave.sparkle"
-# Releases published under the former KeyWeave name. Their signed, notarized assets cannot be
-# renamed, so each keeps its original URL (GitHub redirects the old repository path).
-FORMER_NAME_RELEASES = {"2.4.0"}
 
 
 def archive_url(version):
-    if version in FORMER_NAME_RELEASES:
-        return f"https://github.com/DevAnuhas/keyweave/releases/download/v{version}/KeyWeave-{version}-arm64.dmg"
     return f"https://github.com/DevAnuhas/keytypist/releases/download/v{version}/KeyTypist-{version}-arm64.dmg"
 
 
@@ -95,6 +95,7 @@ def run(arguments):
 
 def generate(args):
     sys.dont_write_bytecode = True
+    require(args.output.resolve() != LEGACY_FEED.resolve(), "Updates/appcast.xml is the frozen KeyWeave feed; write the KeyTypist feed instead")
     from notarize import signature
     app = args.app
     require(app is not None and app.is_dir() and not app.is_symlink(), "Expected a regular app bundle")
@@ -184,7 +185,7 @@ def main():
     parser.add_argument("--app", type=Path)
     parser.add_argument("--archive", type=Path)
     parser.add_argument("--notes", type=Path)
-    parser.add_argument("--output", type=Path, default=ROOT / "Updates/appcast.xml")
+    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args()
     if args.validate_feed:
         releases = validate_feed(args.validate_feed.read_bytes(), allow_empty=True)

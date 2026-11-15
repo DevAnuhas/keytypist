@@ -7,7 +7,7 @@ import TabTypeKit
 @MainActor
 final class Updater: ObservableObject {
     static let shared = Updater()
-    nonisolated static let feedURL = "https://raw.githubusercontent.com/DevAnuhas/keytypist/main/Updates/appcast.xml"
+    nonisolated static let feedURL = "https://raw.githubusercontent.com/DevAnuhas/keytypist/main/Updates/keytypist-appcast.xml"
     nonisolated static let publicKey = "pc1gLnpongI0flX6p0FOVK509djxXgyrKN8rcMB4bRU="
 
     @Published private(set) var canCheckForUpdates = false
