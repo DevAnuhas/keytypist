@@ -4,7 +4,7 @@ A free, local-first macOS writing assistant forked from [TabType](https://github
 
 ## Current state
 
-- Current version: `2.4.0` / build `17`, adding signed in-app updates to the restored opt-in services. Persistent identity and storage namespaces stay unchanged.
+- Current version: `2.5.0` / build `18`, the KeyWeave-to-KeyTypist rename: new bundle identifier and storage namespaces, installed manually (KeyWeave 2.4.0 and earlier stay on their frozen feed; see [FORK-IDENTITY.md](docs/FORK-IDENTITY.md)). 2.4.0 added signed in-app updates to the restored opt-in services.
 - The installed `2.2.1` launch and core suggestions were confirmed working by the user. Startup opens Setup, requires its own Accessibility grant, and loads only an installed local model; downloads remain explicit.
 - Optional services require their local controls; defaults remain off. App/domain exclusions and secure fields constrain acquisition, and consent changes invalidate in-flight/cached results. Sync cannot grant privacy consent from another Mac. Sparkle checks the KeyTypist-owned signed feed daily; installation requires user action. Remote catalog refresh and model-download resume remain disabled. Full Pro/Labs parity is unfinished.
 - Bundle/preferences ID `dev.anuhas.keytypist` and isolated storage, Keychain and iCloud namespaces stay unchanged. Never automatically access or migrate TabType/Cotypist data.
