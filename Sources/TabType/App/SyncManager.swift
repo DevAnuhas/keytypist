@@ -6,7 +6,7 @@ import Security
 import TabTypeKit
 
 /// Opt-in sync through iCloud Drive. Each Mac writes one AES-GCM-sealed file to
-/// iCloud Drive/Keyweave Sync/ with its settings and learned writing; the key is
+/// iCloud Drive/Keytypist Sync/ with its settings and learned writing; the key is
 /// derived from a passphrase the user sets on every Mac, so Apple only ever
 /// stores ciphertext. Local privacy controls never follow another Mac.
 @MainActor
@@ -50,7 +50,7 @@ final class SyncManager: ObservableObject {
         return system.readPassphrase(ProductIdentity.keychainService) != nil
     }
 
-    /// iCloud Drive's folder for Keyweave (nil while sync is unavailable).
+    /// iCloud Drive's folder for Keytypist (nil while sync is unavailable).
     var folder: URL? {
         guard enabled else { return nil }
         let drive = paths.syncDirectory.deletingLastPathComponent()

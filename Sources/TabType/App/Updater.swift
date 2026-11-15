@@ -7,7 +7,7 @@ import TabTypeKit
 @MainActor
 final class Updater: ObservableObject {
     static let shared = Updater()
-    nonisolated static let feedURL = "https://raw.githubusercontent.com/DevAnuhas/keyweave/main/Updates/appcast.xml"
+    nonisolated static let feedURL = "https://raw.githubusercontent.com/DevAnuhas/keytypist/main/Updates/keytypist-appcast.xml"
     nonisolated static let publicKey = "pc1gLnpongI0flX6p0FOVK509djxXgyrKN8rcMB4bRU="
 
     @Published private(set) var canCheckForUpdates = false
@@ -71,7 +71,7 @@ final class Updater: ObservableObject {
                        key: bundle.object(forInfoDictionaryKey: "SUPublicEDKey") as? String,
                        signedFeed: bundle.object(forInfoDictionaryKey: "SURequireSignedFeed") as? Bool ?? false,
                        verifiedExtraction: bundle.object(forInfoDictionaryKey: "SUVerifyUpdateBeforeExtraction") as? Bool ?? false,
-                       isTestProcess: ProcessInfo.processInfo.environment["KEYWEAVE_TEST_HOME"] != nil)
+                       isTestProcess: ProcessInfo.processInfo.environment["KEYTYPIST_TEST_HOME"] != nil)
     }
 
     nonisolated static func permits(bundleIdentifier: String?, isApplication: Bool,

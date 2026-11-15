@@ -1,4 +1,4 @@
-# Releasing KeyWeave
+# Releasing KeyTypist
 
 Requires full Xcode, the cached pinned llama XCFramework, an existing Developer ID Application identity and an existing notarization Keychain profile. Keep signing credentials and notary receipts outside git. Preserve the MIT license and bundled third-party notices.
 
@@ -14,13 +14,13 @@ python3 Scripts/tests/test_release_packaging.py -v
 python3 Scripts/tests/test_appcast.py -v
 Scripts/setup-dmg.sh # Once, to provision the pinned dmgbuild tools.
 RELEASE=1 CONFIG=Release Scripts/build.sh app
-Scripts/notarize.sh app dist/KeyWeave.app
+Scripts/notarize.sh app dist/KeyTypist.app
 Scripts/package.sh
-version="$(plutil -extract CFBundleShortVersionString raw -o - dist/KeyWeave.app/Contents/Info.plist)"
-Scripts/notarize.sh dmg "dist/KeyWeave-$version-arm64.dmg"
+version="$(plutil -extract CFBundleShortVersionString raw -o - dist/KeyTypist.app/Contents/Info.plist)"
+Scripts/notarize.sh dmg "dist/KeyTypist-$version-arm64.dmg"
 Scripts/package.sh --verify
-python3 Scripts/appcast.py --app dist/KeyWeave.app \
-    --archive "dist/KeyWeave-$version-arm64.dmg" --notes /private/path/to/release-notes.md
+python3 Scripts/appcast.py --app dist/KeyTypist.app \
+    --archive "dist/KeyTypist-$version-arm64.dmg" --notes /private/path/to/release-notes.md
 ```
 
 The app and DMG must each receive **Accepted**, be stapled and pass Gatekeeper. Packaging checks the mounted DMG and extracted ZIP against the accepted app, then writes `SHA256SUMS.txt`. The [dmgbuild layout](../../packaging/dmg/settings.py) and [hash-pinned dependencies](../../packaging/dmg/requirements.txt) own the installer recipe. Regenerate its background with `swift Scripts/make-dmg-background.swift packaging/dmg` after changing the source.
@@ -35,10 +35,10 @@ Tag the exact verified source commit as `v<version>`, then publish a normal rele
 
 ```sh
 gh release create "v$version" \
-    "dist/KeyWeave-$version-arm64.dmg" \
-    "dist/KeyWeave-$version-arm64.zip" dist/SHA256SUMS.txt \
-    --repo DevAnuhas/keyweave --verify-tag \
-    --title "KeyWeave $version" --prerelease=false --latest=true \
+    "dist/KeyTypist-$version-arm64.dmg" \
+    "dist/KeyTypist-$version-arm64.zip" dist/SHA256SUMS.txt \
+    --repo DevAnuhas/keytypist --verify-tag \
+    --title "KeyTypist $version" --prerelease=false --latest=true \
     --notes-file /private/path/to/release-notes.md
 ```
 
@@ -48,8 +48,15 @@ Confirm GitHub's latest-release endpoint, anonymously download the assets, compa
 
 Sparkle 2.10.1 is pinned in `Package.swift`. The release build signs its helpers inside-out with the app's Developer ID. Checks run daily by default, can be disabled in About, and always require the user to install. System profiling and silent installation are disabled. Test-home runs do not start Sparkle.
 
-The app pins `Updates/appcast.xml` on this repository's `main` branch and the KeyWeave public EdDSA key. Both the feed and archive signatures are required; verification happens before archive extraction. The private signing key stays in the login Keychain under account `dev.anuhas.keyweave.sparkle`. On initial setup only, run the pinned distribution's `bin/generate_keys --account dev.anuhas.keyweave.sparkle`; commit only its public key. Do not replace an existing key casually or put private keys in the repository.
+The app pins `Updates/keytypist-appcast.xml` on this repository's `main` branch and the KeyTypist public EdDSA key. Both the feed and archive signatures are required; verification happens before archive extraction. The private signing key stays in the login Keychain under account `dev.anuhas.keyweave.sparkle`. On initial setup only, run the pinned distribution's `bin/generate_keys --account dev.anuhas.keyweave.sparkle`; commit only its public key. Do not replace an existing key casually or put private keys in the repository.
 
 `Scripts/release.sh` also generates the feed after notarization. `Scripts/appcast.py` verifies the app/DMG signatures and tickets, signs with the dedicated Keychain account, checks the enclosure signature and signed feed with Sparkle's tools, and atomically replaces the feed. A new release must increment both the version and integer build number. Feed changes must be re-signed; `.gitattributes` preserves their bytes. `--validate-feed` checks metadata only and does not replace cryptographic verification.
 
 Publish and verify the matching GitHub release assets **before** committing/pushing the generated feed, so existing clients never receive an unavailable archive. Keep the generated feed change out of a code PR until those assets exist. Test a background update prompt and actual installation/replacement on an owned copy. Versions through 2.3.0 have no active updater and require one manual bootstrap upgrade. Replacing a DMG under an existing version breaks its recorded signature; publish a new build instead.
+
+## First release after the KeyWeave rename
+
+- KeyTypist is a new app to macOS (new bundle identifier, storage and permissions), and KeyWeave 2.4.0 cannot update to it in place. Say so in the release notes: install KeyTypist manually, grant permissions again, nothing is migrated from KeyWeave.
+- Never add a KeyTypist release to `Updates/appcast.xml`. It is the frozen KeyWeave feed; the generator refuses it and a test pins its bytes. KeyWeave users should keep seeing "up to date". See [FORK-IDENTITY.md](../FORK-IDENTITY.md) for the tested reason.
+- `Scripts/appcast.py` creates `Updates/keytypist-appcast.xml` on the first release. Publish the release assets first, then commit the feed promptly: until it exists on `main`, a manual update check in KeyTypist fails with a download error.
+- Use `--repo DevAnuhas/keytypist`. Existing releases may be retitled, but never re-upload or rename their signed assets.

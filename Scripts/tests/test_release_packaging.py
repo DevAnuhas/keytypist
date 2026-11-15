@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 class ReleasePackagingTests(unittest.TestCase):
     def setUp(self):
-        self.temporary = tempfile.TemporaryDirectory(prefix="keyweave-release-test-")
+        self.temporary = tempfile.TemporaryDirectory(prefix="keytypist-release-test-")
         self.root = Path(self.temporary.name) / "repo"
         self.root.mkdir()
         (self.root / "Scripts").mkdir()
@@ -25,9 +25,9 @@ class ReleasePackagingTests(unittest.TestCase):
         self.environment = {**os.environ, "PATH": str(self.root / "bin") + ":/usr/bin:/bin",
                             "SIGN_IDENTITY": "", "DEVELOPMENT_TEAM": "", "KEYCHAIN_PROFILE": "",
                             "RELEASE": "0", "DMGBUILD_VENV": "", "DMG_WHEELHOUSE": "",
-                            "PYTHONDONTWRITEBYTECODE": "1", "KEYWEAVE_TEST_CALLS": str(self.calls)}
+                            "PYTHONDONTWRITEBYTECODE": "1", "KEYTYPIST_TEST_CALLS": str(self.calls)}
         for name in ["xcrun", "codesign", "security", "hdiutil", "swift"]:
-            self.tool(name, '#!/bin/bash\nprintf "%s\\n" "$0 $*" >> "$KEYWEAVE_TEST_CALLS"\nexit 91\n')
+            self.tool(name, '#!/bin/bash\nprintf "%s\\n" "$0 $*" >> "$KEYTYPIST_TEST_CALLS"\nexit 91\n')
 
     def tearDown(self):
         self.temporary.cleanup()
@@ -77,7 +77,7 @@ class ReleasePackagingTests(unittest.TestCase):
         resources = self.root / "Resources"
         resources.mkdir()
         (resources / "Info.plist").write_bytes(plistlib.dumps({
-            "CFBundleIdentifier": "dev.anuhas.keyweave", "CFBundleExecutable": "KeyWeave"
+            "CFBundleIdentifier": "dev.anuhas.keytypist", "CFBundleExecutable": "KeyTypist"
         }))
         (resources / "TabType.entitlements").write_bytes(plistlib.dumps({}))
         (self.root / "LICENSE").write_text("Synthetic MIT notice")
@@ -105,7 +105,7 @@ printf 'synthetic framework' > "$products/llama.framework/llama"
         self.tool("lipo", '#!/bin/bash\nexit 0\n')
         self.tool("codesign", f'''#!{sys.executable}
 import json,os,sys
-with open(os.environ["KEYWEAVE_TEST_CALLS"],"a") as stream:stream.write(json.dumps(sys.argv[1:])+"\\n")
+with open(os.environ["KEYTYPIST_TEST_CALLS"],"a") as stream:stream.write(json.dumps(sys.argv[1:])+"\\n")
 if sys.argv[1]=="-d":
  print("CodeDirectory flags=0x10000(runtime)")
  print("Timestamp=synthetic timestamp")
@@ -116,7 +116,7 @@ if sys.argv[1]=="-d":
         signs = [arguments for arguments in calls if arguments[0] == "--force"]
         self.assertEqual(len(signs), 7)
         self.assertTrue(signs[0][-1].endswith("/Contents/Frameworks/llama.framework"))
-        self.assertTrue(signs[-1][-1].endswith("/KeyWeave.app"))
+        self.assertTrue(signs[-1][-1].endswith("/KeyTypist.app"))
         self.assertTrue(signs[-2][-1].endswith("/Contents/Frameworks/Sparkle.framework"))
         signed = [arguments[-1] for arguments in signs]
         for helper in ["Autoupdate", "Updater.app", "XPCServices/Downloader.xpc", "XPCServices/Installer.xpc"]:
@@ -131,10 +131,10 @@ if sys.argv[1]=="-d":
         self.assertIn("--entitlements", signs[-1])
         for arguments in signs[1:-2]:
             self.assertIn("--preserve-metadata=entitlements", arguments)
-        self.assertTrue((self.root / "dist/KeyWeave.app/Contents/MacOS/KeyWeave").is_file())
+        self.assertTrue((self.root / "dist/KeyTypist.app/Contents/MacOS/KeyTypist").is_file())
 
     def test_notary_without_profile_never_invokes_platform_tools(self):
-        result = subprocess.run(["python3", str(self.script("notarize.py")), "app", str(self.root / "KeyWeave.app")],
+        result = subprocess.run(["python3", str(self.script("notarize.py")), "app", str(self.root / "KeyTypist.app")],
                                 env=self.environment, capture_output=True, text=True)
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("KEYCHAIN_PROFILE", result.stderr)
@@ -173,20 +173,20 @@ if sys.argv[1]=="-d":
         self.assertEqual(artifact.read_bytes(), b"synthetic disk image, never mount")
 
     def test_dmgbuild_layout(self):
-        app = self.root / "KeyWeave.app"
+        app = self.root / "KeyTypist.app"
         resources = self.root / "artwork"
         license_file = self.root / "LICENSE"
         settings = runpy.run_path(str(ROOT / "packaging/dmg/settings.py"), init_globals={
             "defines": {"app": str(app), "resources": str(resources), "license": str(license_file)}
         })
-        self.assertEqual(settings["files"], [(str(app), "KeyWeave.app"), (str(license_file), "License.txt")])
+        self.assertEqual(settings["files"], [(str(app), "KeyTypist.app"), (str(license_file), "License.txt")])
         self.assertEqual(settings["symlinks"], {"Applications": "/Applications"})
         self.assertEqual(settings["filesystem"], "HFS+")
         self.assertEqual(settings["format"], "UDZO")
         self.assertEqual(settings["icon"], str(app / "Contents/Resources/AppIcon.icns"))
         self.assertEqual(settings["background"], str(resources / "background.png"))
         self.assertEqual(settings["window_rect"], ((180, 180), (600, 500)))
-        self.assertEqual(settings["icon_locations"], {"KeyWeave.app": (150, 180), "Applications": (450, 180), "License.txt": (520, 320)})
+        self.assertEqual(settings["icon_locations"], {"KeyTypist.app": (150, 180), "Applications": (450, 180), "License.txt": (520, 320)})
         self.assertEqual(settings["icon_size"], 80)
         self.assertEqual(settings["text_size"], 13)
         self.assertFalse(settings["show_status_bar"])
@@ -212,7 +212,7 @@ if sys.argv[1]=="-d":
         self.tool("python3", f'''#!{sys.executable}
 import json,os,pathlib,shutil,sys
 args=sys.argv[1:]
-with open(os.environ["KEYWEAVE_TEST_CALLS"],"a") as stream:stream.write(json.dumps(args)+"\\n")
+with open(os.environ["KEYTYPIST_TEST_CALLS"],"a") as stream:stream.write(json.dumps(args)+"\\n")
 if args[:2]==["-m","venv"]:
  target=pathlib.Path(args[2])/"bin";target.mkdir(parents=True)
  shutil.copyfile(sys.argv[0],target/"python3");(target/"python3").chmod(0o755)
@@ -222,7 +222,7 @@ if args[:2]==["-m","venv"]:
         calls = [json.loads(line) for line in self.calls.read_text().splitlines()]
         creates = [args for args in calls if args[:2] == ["-m", "venv"]]
         self.assertEqual(len(creates), 1)
-        self.assertEqual(Path(creates[0][2]).relative_to(self.root.resolve()), Path(".build-keyweave/tools/dmgbuild"))
+        self.assertEqual(Path(creates[0][2]).relative_to(self.root.resolve()), Path(".build-keytypist/tools/dmgbuild"))
         installs = [args for args in calls if args[:3] == ["-m", "pip", "install"]]
         self.assertEqual(len(installs), 1)
         for flag in ["--require-hashes", "--only-binary=:all:", "--no-index", "--find-links"]:
@@ -234,14 +234,14 @@ if args[:2]==["-m","venv"]:
             self.assertIn(value, checks[0])
 
     def make_dmg_fixture(self):
-        app = self.root / "dist/KeyWeave.app"
+        app = self.root / "dist/KeyTypist.app"
         for relative in ["Contents/MacOS", "Contents/Resources", "Contents/_CodeSignature"]:
             (app / relative).mkdir(parents=True)
         (app / "Contents/Info.plist").write_bytes(plistlib.dumps({
-            "CFBundleIdentifier": "dev.anuhas.keyweave", "CFBundleExecutable": "KeyWeave",
+            "CFBundleIdentifier": "dev.anuhas.keytypist", "CFBundleExecutable": "KeyTypist",
             "CFBundleShortVersionString": "2.2.0"
         }))
-        (app / "Contents/MacOS/KeyWeave").write_bytes(b"synthetic signed executable")
+        (app / "Contents/MacOS/KeyTypist").write_bytes(b"synthetic signed executable")
         (app / "Contents/Resources/AppIcon.icns").write_bytes(b"synthetic volume icon")
         (app / "Contents/_CodeSignature/CodeResources").write_bytes(b"synthetic resource seal")
         (self.root / "LICENSE").write_bytes(b"synthetic MIT license")
@@ -250,13 +250,13 @@ if args[:2]==["-m","venv"]:
         shutil.copyfile(ROOT / "packaging/dmg/settings.py", resources / "settings.py")
         for name, width, height in [("background.png", 600, 400), ("background@2x.png", 1200, 800)]:
             (resources / name).write_bytes(b"\x89PNG\r\n\x1a\n" + b"\x00\x00\x00\rIHDR" + width.to_bytes(4, "big") + height.to_bytes(4, "big"))
-        venv = self.root / ".build-keyweave/tools/dmgbuild/bin"
+        venv = self.root / ".build-keytypist/tools/dmgbuild/bin"
         venv.mkdir(parents=True)
         probe = f'''#!{sys.executable}
 import json,os,pathlib,shutil,sys
 args=sys.argv[1:]
 name=pathlib.Path(sys.argv[0]).name
-with open(os.environ["KEYWEAVE_TEST_CALLS"],"a") as stream:stream.write(json.dumps({{"tool":name,"args":args}})+"\\n")
+with open(os.environ["KEYTYPIST_TEST_CALLS"],"a") as stream:stream.write(json.dumps({{"tool":name,"args":args}})+"\\n")
 '''
         def write_probe(path, body):
             path.write_text(probe + body)
@@ -271,20 +271,20 @@ os.execv(sys.executable,[sys.executable]+args)
 for index,value in enumerate(args):
  if value=="-D":
   key,item=args[index+1].split("=",1);values[key]=item
-payload=pathlib.Path(os.environ["KEYWEAVE_TEST_PAYLOAD"])
+payload=pathlib.Path(os.environ["KEYTYPIST_TEST_PAYLOAD"])
 payload.mkdir()
-shutil.copytree(values["app"],payload/"KeyWeave.app")
+shutil.copytree(values["app"],payload/"KeyTypist.app")
 shutil.copyfile(values["license"],payload/"License.txt")
 (payload/"Applications").symlink_to("/Applications")
 pathlib.Path(args[-1]).write_bytes(b"synthetic dmgbuild image")
-pathlib.Path(os.environ["KEYWEAVE_TEST_STATE"]).write_text(json.dumps({"image":args[-1],"attached":False}))
+pathlib.Path(os.environ["KEYTYPIST_TEST_STATE"]).write_text(json.dumps({"image":args[-1],"attached":False}))
 ''')
-        write_probe(self.root / "bin/hdiutil", '''state_path=pathlib.Path(os.environ["KEYWEAVE_TEST_STATE"])
+        write_probe(self.root / "bin/hdiutil", '''state_path=pathlib.Path(os.environ["KEYTYPIST_TEST_STATE"])
 state=json.loads(state_path.read_text()) if state_path.exists() else {}
 if args[0]=="create":sys.exit(89)
 if args[0]=="attach":
  mount=pathlib.Path(args[args.index("-mountpoint")+1])
- shutil.copytree(os.environ["KEYWEAVE_TEST_PAYLOAD"],mount,dirs_exist_ok=True,symlinks=True)
+ shutil.copytree(os.environ["KEYTYPIST_TEST_PAYLOAD"],mount,dirs_exist_ok=True,symlinks=True)
  state["image"]=next(value for value in args if value.endswith(".dmg"))
  state["attached"]=True;state_path.write_text(json.dumps(state))
 elif args[0]=="info":
@@ -297,7 +297,7 @@ elif args[0]=="detach":
  state["attached"]=False;state_path.write_text(json.dumps(state))
 ''')
         environment = {"SIGN_IDENTITY": "1111111111111111111111111111111111111111", "DEVELOPMENT_TEAM": "AAAAAAAAAA",
-                       "KEYWEAVE_TEST_PAYLOAD": str(self.root / "payload"), "KEYWEAVE_TEST_STATE": str(self.root / "state.json")}
+                       "KEYTYPIST_TEST_PAYLOAD": str(self.root / "payload"), "KEYTYPIST_TEST_STATE": str(self.root / "state.json")}
         return app, environment
 
     def test_package_uses_dmgbuild_without_mutating_app_or_detaching_other_images(self):
@@ -316,12 +316,12 @@ elif args[0]=="detach":
         detaches = [call["args"][1] for call in calls if call["tool"] == "hdiutil" and call["args"][0] == "detach"]
         self.assertIn("/dev/disk999", detaches)
         self.assertNotIn("/dev/disk888", detaches)
-        self.assertEqual((self.root / "dist/KeyWeave-2.2.0-arm64.dmg").read_bytes(), b"synthetic dmgbuild image")
-        self.assertFalse((self.root / "dist/KeyWeave-2.2.0-arm64.dmg.lock").exists())
+        self.assertEqual((self.root / "dist/KeyTypist-2.2.0-arm64.dmg").read_bytes(), b"synthetic dmgbuild image")
+        self.assertFalse((self.root / "dist/KeyTypist-2.2.0-arm64.dmg.lock").exists())
 
     def test_existing_dmg_is_never_overwritten(self):
         _, environment = self.make_dmg_fixture()
-        image = self.root / "dist/KeyWeave-2.2.0-arm64.dmg"
+        image = self.root / "dist/KeyTypist-2.2.0-arm64.dmg"
         image.write_bytes(b"existing accepted image")
         result = self.run_script("package.sh", environment)
         self.assertNotEqual(result.returncode, 0)
@@ -332,16 +332,16 @@ elif args[0]=="detach":
 
     def test_final_verification_mounts_only_a_private_copy_and_detaches_it(self):
         app, environment = self.make_dmg_fixture()
-        image = self.root / "dist/KeyWeave-2.2.0-arm64.dmg"
+        image = self.root / "dist/KeyTypist-2.2.0-arm64.dmg"
         image.write_bytes(b"synthetic accepted image")
-        archive = self.root / "dist/KeyWeave-2.2.0-arm64.zip"
+        archive = self.root / "dist/KeyTypist-2.2.0-arm64.zip"
         with zipfile.ZipFile(archive, "w") as packaged:
             for path in app.rglob("*"):
                 if path.is_file(): packaged.write(path, str(path.relative_to(app.parent)))
             packaged.write(self.root / "LICENSE", "LICENSE")
-        payload = Path(environment["KEYWEAVE_TEST_PAYLOAD"])
+        payload = Path(environment["KEYTYPIST_TEST_PAYLOAD"])
         payload.mkdir()
-        shutil.copytree(app, payload / "KeyWeave.app")
+        shutil.copytree(app, payload / "KeyTypist.app")
         shutil.copyfile(self.root / "LICENSE", payload / "License.txt")
         (payload / "Applications").symlink_to("/Applications")
         script = self.script("package.sh")
@@ -353,11 +353,11 @@ elif args[0]=="detach":
         self.assertEqual(len(attaches), 1)
         attached_image = next(value for value in attaches[0] if value.endswith(".dmg"))
         self.assertNotEqual(Path(attached_image), image)
-        self.assertIn(".KeyWeave-package.", attached_image)
-        self.assertFalse(json.loads(Path(environment["KEYWEAVE_TEST_STATE"]).read_text())["attached"])
+        self.assertIn(".KeyTypist-package.", attached_image)
+        self.assertFalse(json.loads(Path(environment["KEYTYPIST_TEST_STATE"]).read_text())["attached"])
         self.assertEqual(image.read_bytes(), b"synthetic accepted image")
         self.assertEqual(len((self.root / "dist/SHA256SUMS.txt").read_text().splitlines()), 2)
-        self.assertEqual(list((self.root / "dist").glob(".KeyWeave-package.*")), [])
+        self.assertEqual(list((self.root / "dist").glob(".KeyTypist-package.*")), [])
 
 
 if __name__ == "__main__":

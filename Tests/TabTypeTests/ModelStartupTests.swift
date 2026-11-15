@@ -21,7 +21,7 @@ final class ModelStartupTests: XCTestCase {
         let entry = try XCTUnwrap(catalog.models.first)
         for fixture in ["absent", "partial", "truncated", "deleted-custom"] {
             let home = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-            let domain = "dev.anuhas.keyweave.tests.model-start.\(UUID())"
+            let domain = "dev.anuhas.keytypist.tests.model-start.\(UUID())"
             let defaults = try XCTUnwrap(UserDefaults(suiteName: domain))
             defer {
                 try? FileManager.default.removeItem(at: home)
@@ -65,7 +65,7 @@ final class ModelStartupTests: XCTestCase {
 
     func testInvalidInstalledModelReportsLoadFailureWithoutRetryingOrDownloading() async throws {
         let home = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        let domain = "dev.anuhas.keyweave.tests.model-start.\(UUID())"
+        let domain = "dev.anuhas.keytypist.tests.model-start.\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: domain))
         defer {
             try? FileManager.default.removeItem(at: home)
@@ -106,7 +106,7 @@ final class ModelStartupTests: XCTestCase {
 
     func testUnknownSavedSelectionReportsRecoverableSetupFailureWithoutLoading() async throws {
         let home = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        let domain = "dev.anuhas.keyweave.tests.model-start.\(UUID())"
+        let domain = "dev.anuhas.keytypist.tests.model-start.\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: domain))
         defer { defaults.removePersistentDomain(forName: domain) }
         defaults.set("unknown:removed-catalog-model", forKey: "llamaModelID")
@@ -128,7 +128,7 @@ final class ModelStartupTests: XCTestCase {
 
     func testStartLoadsInstalledSelectedModelOnceWithoutChangingStores() async throws {
         let home = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        let domain = "dev.anuhas.keyweave.tests.model-start.\(UUID())"
+        let domain = "dev.anuhas.keytypist.tests.model-start.\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: domain))
         defer {
             try? FileManager.default.removeItem(at: home)

@@ -2,7 +2,7 @@
 
 The bundle ID deliberately equals the explicit synthetic preferences domain.
 Only fresh, uniquely named test domains are seeded or removed; no application,
-model, SwiftPM dependency, permission prompt, or real KeyWeave domain is used.
+model, SwiftPM dependency, permission prompt, or real KeyTypist domain is used.
 """
 import base64
 import os
@@ -112,7 +112,7 @@ struct PreferencesProbe {
 class AppPreferencesBundleTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.temporary = tempfile.TemporaryDirectory(prefix="keyweave-preferences-test-")
+        cls.temporary = tempfile.TemporaryDirectory(prefix="keytypist-preferences-test-")
         cls.addClassCleanup(cls.temporary.cleanup)
         cls.root = Path(cls.temporary.name).resolve()
         cls.compiler = shutil.which("swiftc")
@@ -140,12 +140,12 @@ class AppPreferencesBundleTests(unittest.TestCase):
         self.home = self.fixture / "synthetic-home"
         self.home.mkdir(mode=0o700)
         self.environment = {key: value for key, value in os.environ.items()
-                            if not key.startswith(("KEYWEAVE_", "TABTYPE_"))}
-        self.environment["KEYWEAVE_TEST_HOME"] = str(self.home)
+                            if not key.startswith(("KEYTYPIST_", "TABTYPE_"))}
+        self.environment["KEYTYPIST_TEST_HOME"] = str(self.home)
         # Foundation standardizes home aliases; ask the real pure function.
         self.domain = subprocess.run([str(self.executable), "domain"], env=self.environment,
                                      capture_output=True, text=True, check=True, timeout=15).stdout.strip()
-        self.assertRegex(self.domain, r"^dev\.anuhas\.keyweave\.test\.[a-f0-9]{64}$")
+        self.assertRegex(self.domain, r"^dev\.anuhas\.keytypist\.test\.[a-f0-9]{64}$")
         self.sibling = self.domain + ".sibling"
         self.addCleanup(self.remove_domains)
         self.app = self.fixture / "PreferencesProbe.app"

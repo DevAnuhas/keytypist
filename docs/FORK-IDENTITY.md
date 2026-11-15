@@ -1,12 +1,12 @@
 # Fork identity and first-run safety
 
-The app is KeyWeave (`dev.anuhas.keyweave`); internal Swift modules retain TabType names. Keep the isolated identity and storage boundaries below when changing startup or distribution.
+The app is KeyTypist (`dev.anuhas.keytypist`); internal Swift modules retain TabType names. Keep the isolated identity and storage boundaries below when changing startup or distribution.
 
 ## Existing coupling to inspect
 
 - `Resources/Info.plist`: display/executable/bundle identifiers.
 - `Scripts/build.sh`, `Scripts/setup-signing.sh`, `Scripts/release.sh`: output names, signing certificate label, identifier and release packaging.
-- `Sources/TabType/App/Updater.swift`: only the pinned KeyWeave feed and public key may activate Sparkle. Test processes remain inert.
+- `Sources/TabType/App/Updater.swift`: only the pinned KeyTypist feed and public key may activate Sparkle. Test processes remain inert.
 - `Sources/TabTypeKit/Catalog/ModelCatalog.swift`: the moving upstream catalog endpoint.
 - `Sources/TabTypeKit/Catalog/ModelStore.swift`, `Sources/TabType/Core/WritingStore.swift`, settings/statistics/logging: Application Support and preference namespaces.
 - `Sources/TabType/App/SyncManager.swift`: `app.tabtype.sync` Keychain service and `TabType Sync` iCloud Drive folder.
@@ -15,11 +15,11 @@ The app is KeyWeave (`dev.anuhas.keyweave`); internal Swift modules retain TabTy
 
 ## Intended boundary
 
-Use `KeyWeave` as the working display/bundle output name and a distinct application identifier, provisionally `dev.anuhas.keyweave`. Keep internal Swift module names if renaming them creates unnecessary risk. The signer may require a different final identifier; verify it before distribution.
+Use `KeyTypist` as the working display/bundle output name and a distinct application identifier, provisionally `dev.anuhas.keytypist`. Keep internal Swift module names if renaming them creates unnecessary risk. The signer may require a different final identifier; verify it before distribution.
 
 Give the fork its own Application Support, preferences, Keychain service and cloud-sync namespace. Do not silently read, migrate, overwrite, delete or synchronize TabType/Cotypist data. Import, if added later, is explicit and reversible. Models may be large; do not duplicate or move another app's installed weights without permission and license checks.
 
-Disable inherited automatic updates until a KeyWeave-owned distribution source and publisher verification exist. Repointing a URL alone is not enough: asset naming, bundle identity, checksum, signing trust and recovery must agree. A new fork with no releases must show a benign no-update state, not install an upstream TabType build.
+Disable inherited automatic updates until a KeyTypist-owned distribution source and publisher verification exist. Repointing a URL alone is not enough: asset naming, bundle identity, checksum, signing trust and recovery must agree. A new fork with no releases must show a benign no-update state, not install an upstream TabType build.
 
 Choose whether to pin or own the remote model catalog; do not inherit unreviewed future catalog changes silently. Preserve model-license notices and download verification.
 
@@ -33,4 +33,20 @@ For local development, use a distinct stable development signing identity rather
 - Fork updater tests for no release, wrong application/publisher, bad checksum and failed replacement.
 - Relaunch/rebuild permissions behavior recorded; no promise that the old app's grants transfer to a new bundle identity.
 
-The production app uses these isolated namespaces. In-app updates require a signed KeyWeave feed, EdDSA archive verification before extraction, and Developer ID verification; the [release runbook](runbooks/releasing.md) owns publishing instructions.
+The production app uses these isolated namespaces. In-app updates require a signed KeyTypist feed, EdDSA archive verification before extraction, and Developer ID verification; the [release runbook](runbooks/releasing.md) owns publishing instructions.
+
+## Rename history: KeyWeave to KeyTypist
+
+The product was renamed from KeyWeave to KeyTypist after 2.4.0, including the bundle identifier (`dev.anuhas.keyweave` to `dev.anuhas.keytypist`) and the GitHub repository (`DevAnuhas/keytypist`; GitHub redirects the old path, so never create a new repository named `keyweave`).
+
+- The rename moved every namespace: Application Support, Caches, Logs, preferences, the `dev.anuhas.keytypist.sync` Keychain service, the `Keytypist Sync` iCloud folder and `.keytypistsync` files. Nothing is migrated from KeyWeave, TabType or Cotypist automatically. A KeyWeave user's models, settings and learned writing stay in the old locations until an explicit, reversible import exists.
+- macOS treats KeyTypist as a new app: Accessibility, Input Monitoring and Screen Recording must be granted again.
+- Release 2.4.0 and earlier stay published as KeyWeave; their signed, notarized assets are not renamed. Git tags (`v*`) never contained the product name and are unchanged.
+- **Two feeds, by decision (2026-11-15).** KeyWeave 2.4.0 and earlier keep reading `Updates/appcast.xml` through the old repository URL. That file is EdDSA-signed and **frozen**: a test pins its SHA-256 and `Scripts/appcast.py` refuses to write it. KeyTypist reads `Updates/keytypist-appcast.xml` (`Updater.feedURL` / `SUFeedURL`) and `Updater.permits` rejects any other feed. KeyWeave users therefore see "up to date" and never a failing offer, and they move to KeyTypist by installing it manually. No in-app migration archive is shipped (see the tested results below for why one would need a `KeyWeave.app`-named bundle).
+- The Sparkle EdDSA public key is unchanged and the private key stays in the login Keychain under the legacy account label `dev.anuhas.keyweave.sparkle`. Relabeling it would orphan the key.
+- Installed KeyWeave copies still read the feed at the old raw URL, which redirects to the new repository. **In-app update across the identifier change was tested on 2026-11-15** with Sparkle 2.10.1's own `sparkle-cli` against the real 2.4.0 bundle (Info.plist patched to a local feed and a throwaway EdDSA key; ad-hoc re-signed; Developer ID not exercised). Results:
+  - The signed feed is accepted and 2.5.0 is offered.
+  - An update archive containing `KeyTypist.app` (new identifier) **fails** with `SUSparkleErrorDomain` 4005, displayed as "improperly signed". The cause is not signing: `SUInstaller.installSourcePathInUpdateFolder` selects the app in the archive only if its filename equals the host's (`KeyWeave.app`) or its bundle identifier equals the host's, so nothing is found ("No suitable install is found in the update").
+  - The same archive with the app named `KeyWeave.app` **installs**: the result is `KeyWeave.app` containing the KeyTypist bundle (new identifier, `KeyTypist` executable, new version). Sparkle does not rename it, so the installed copy keeps a `KeyWeave.app` filename.
+  - A control that keeps the old identifier also installs, so the identifier, not the test setup, is the variable.
+  - Not tested: Developer ID signing and notarization, a DMG built by `package.sh`, an app that is running during the update, and the next update after the migration.

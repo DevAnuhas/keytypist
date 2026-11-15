@@ -214,7 +214,7 @@ final class OptionalSyncRoundTripTests: XCTestCase {
     }
 
     private func fixtureRoot() throws -> URL {
-        let root = FileManager.default.temporaryDirectory.appendingPathComponent("KeyWeave-synthetic-Macs-\(UUID())")
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("KeyTypist-synthetic-Macs-\(UUID())")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false,
                                                 attributes: [.posixPermissions: 0o700])
         return root
@@ -230,7 +230,7 @@ final class OptionalSyncRoundTripTests: XCTestCase {
 /// cloud-folder files simulates a file provider; this is not a real iCloud test.
 @MainActor
 private final class SyntheticMac {
-    let domain = "dev.anuhas.keyweave.test.synthetic-Mac.\(UUID())"
+    let domain = "dev.anuhas.keytypist.test.synthetic-Mac.\(UUID())"
     let defaults: UserDefaults
     let settings: AppSettings
     let paths: AppPaths

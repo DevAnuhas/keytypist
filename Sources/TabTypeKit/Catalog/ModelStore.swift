@@ -2,7 +2,7 @@ import CryptoKit
 import Foundation
 
 /// Where model files live and what's installed.
-/// Default: Keyweave's model directory. Construction and getters are read-only.
+/// Default: Keytypist's model directory. Construction and getters are read-only.
 public struct ModelStore: Sendable {
     public let directory: URL
 

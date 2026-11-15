@@ -9,8 +9,8 @@ import XCTest
 @MainActor
 final class SettingsIsolationTests: XCTestCase {
     func testReopeningSettingsLeavesSyntheticStoresUntouched() throws {
-        guard let testHome = ProcessInfo.processInfo.environment["KEYWEAVE_TEST_HOME"],
-              let token = ProcessInfo.processInfo.environment["KEYWEAVE_TEST_TOKEN"] else {
+        guard let testHome = ProcessInfo.processInfo.environment["KEYTYPIST_TEST_HOME"],
+              let token = ProcessInfo.processInfo.environment["KEYTYPIST_TEST_TOKEN"] else {
             throw XCTSkip("Run Scripts/test.sh to create an owned disposable Settings fixture")
         }
         let home = try validatedFixtureHome(testHome, token: token)
@@ -61,11 +61,11 @@ final class SettingsIsolationTests: XCTestCase {
     func testFixtureValidationRejectsUnownedExistingAndEscapingPaths() throws {
         XCTAssertThrowsError(try validatedFixtureHome("/", token: "unowned"))
         let fm = FileManager.default
-        let home = fm.temporaryDirectory.appendingPathComponent("keyweave-gate0-tests-\(UUID())")
-        let outside = fm.temporaryDirectory.appendingPathComponent("keyweave-gate0-outside-\(UUID())")
+        let home = fm.temporaryDirectory.appendingPathComponent("keytypist-gate0-tests-\(UUID())")
+        let outside = fm.temporaryDirectory.appendingPathComponent("keytypist-gate0-outside-\(UUID())")
         defer { try? fm.removeItem(at: home); try? fm.removeItem(at: outside) }
         try fm.createDirectory(at: home, withIntermediateDirectories: false)
-        try Data("owned".utf8).write(to: home.appendingPathComponent(".keyweave-test-home"), options: .withoutOverwriting)
+        try Data("owned".utf8).write(to: home.appendingPathComponent(".keytypist-test-home"), options: .withoutOverwriting)
         let preexisting = home.appendingPathComponent("Library/Application Support/TabType")
         try fm.createDirectory(at: preexisting, withIntermediateDirectories: true)
         let sentinel = preexisting.appendingPathComponent("history.key")
@@ -81,7 +81,7 @@ final class SettingsIsolationTests: XCTestCase {
     }
 
     func testPersistedDirectAndSyncedAppOverridesCannotEnableContextOrWriting() throws {
-        let domain = "dev.anuhas.keyweave.tests.overrides.\(UUID())"
+        let domain = "dev.anuhas.keytypist.tests.overrides.\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: domain))
         defer { defaults.removePersistentDomain(forName: domain); AppPolicyStore.userOverrides = [:] }
         var override = AppOverride()
@@ -123,8 +123,8 @@ final class SettingsIsolationTests: XCTestCase {
         let canonical = home.resolvingSymlinksInPath().standardizedFileURL
         let temporary = FileManager.default.temporaryDirectory.resolvingSymlinksInPath().standardizedFileURL
         guard canonical.deletingLastPathComponent().path == temporary.path,
-              canonical.lastPathComponent.hasPrefix("keyweave-gate0-tests-"),
-              try String(contentsOf: home.appendingPathComponent(".keyweave-test-home"), encoding: .utf8) == token
+              canonical.lastPathComponent.hasPrefix("keytypist-gate0-tests-"),
+              try String(contentsOf: home.appendingPathComponent(".keytypist-test-home"), encoding: .utf8) == token
         else { throw UnsafeFixture.unowned }
         for root in fixtureRoots(home: home) {
             var ancestor = home

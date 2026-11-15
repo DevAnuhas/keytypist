@@ -28,7 +28,7 @@ private final class PlatformOperationRecorder: @unchecked Sendable {
 final class StartupIsolationTests: XCTestCase {
     @MainActor
     func testDirectUpdateCheckCannotUseNetworkOrPersistPreferences() async throws {
-        let suite = "dev.anuhas.keyweave.tests.\(UUID().uuidString)"
+        let suite = "dev.anuhas.keytypist.tests.\(UUID().uuidString)"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
         defaults.set(true, forKey: "checkForUpdates")
@@ -90,7 +90,7 @@ final class StartupIsolationTests: XCTestCase {
             defer { try? FileManager.default.removeItem(at: home) }
             let paths = AppPaths(homeDirectory: home)
             let store = ModelStore(paths: paths)
-            let suite = "dev.anuhas.keyweave.tests.\(UUID().uuidString)"
+            let suite = "dev.anuhas.keytypist.tests.\(UUID().uuidString)"
             let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
             defer { defaults.removePersistentDomain(forName: suite) }
             let selected = fixture == "installed" ? "custom:synthetic.gguf" : entry.id
@@ -140,7 +140,7 @@ final class StartupIsolationTests: XCTestCase {
 
     @MainActor
     func testOpeningAppAgainShowsAndReusesSettings() throws {
-        guard ProcessInfo.processInfo.environment["KEYWEAVE_TEST_HOME"] != nil else {
+        guard ProcessInfo.processInfo.environment["KEYTYPIST_TEST_HOME"] != nil else {
             throw XCTSkip("Run Scripts/test.sh for an isolated preferences and storage root")
         }
         let app = NSApplication.shared
@@ -158,7 +158,7 @@ final class StartupIsolationTests: XCTestCase {
 
     @MainActor
     func testDirectEngineStartRequiresAccessibilityBeforePlatformMonitoring() throws {
-        let suite = "dev.anuhas.keyweave.tests.input.\(UUID())"
+        let suite = "dev.anuhas.keytypist.tests.input.\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
         let engine = Engine(settings: AppSettings(defaults: defaults), accessibilityTrusted: { false })

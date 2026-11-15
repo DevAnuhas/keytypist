@@ -5,8 +5,8 @@ import XCTest
 final class LogTests: XCTestCase {
     func testConstructionPreservesExistingLogBytesAndDoesNotCreateDirectories() throws {
         try withDirectory { directory in
-            let active = directory.appendingPathComponent("keyweave.log")
-            let previous = directory.appendingPathComponent("keyweave.1.log")
+            let active = directory.appendingPathComponent("keytypist.log")
+            let previous = directory.appendingPathComponent("keytypist.1.log")
             let oversized = oversizedLog(ending: "synthetic existing tail\n")
             let archive = Data("synthetic archive sentinel\n".utf8)
             try oversized.write(to: active, options: .withoutOverwriting)
@@ -20,14 +20,14 @@ final class LogTests: XCTestCase {
             XCTAssertEqual(try Data(contentsOf: active), oversized)
             XCTAssertEqual(try Data(contentsOf: previous), archive)
             XCTAssertEqual(try Set(FileManager.default.contentsOfDirectory(atPath: directory.path)),
-                           ["keyweave.log", "keyweave.1.log"])
+                           ["keytypist.log", "keytypist.1.log"])
         }
     }
 
     func testFirstQueuedWriteRotatesAnOversizedLog() throws {
         try withDirectory { directory in
-            let active = directory.appendingPathComponent("keyweave.log")
-            let previous = directory.appendingPathComponent("keyweave.1.log")
+            let active = directory.appendingPathComponent("keytypist.log")
+            let previous = directory.appendingPathComponent("keytypist.1.log")
             try oversizedLog(ending: "synthetic retained tail\n").write(to: active, options: .withoutOverwriting)
             try Data("synthetic old archive\n".utf8).write(to: previous, options: .withoutOverwriting)
             let log = Log(directory: directory)
@@ -44,8 +44,8 @@ final class LogTests: XCTestCase {
 
     func testRepeatedShortSessionsCannotAvoidRotation() throws {
         try withDirectory { directory in
-            let active = directory.appendingPathComponent("keyweave.log")
-            let previous = directory.appendingPathComponent("keyweave.1.log")
+            let active = directory.appendingPathComponent("keytypist.log")
+            let previous = directory.appendingPathComponent("keytypist.1.log")
             var retainedTail = "synthetic initial tail\n"
             try oversizedLog(ending: retainedTail).write(to: active, options: .withoutOverwriting)
 
@@ -74,8 +74,8 @@ final class LogTests: XCTestCase {
 
     func testLongSessionRechecksAfterFiveHundredAdditionalWrites() throws {
         try withDirectory { directory in
-            let active = directory.appendingPathComponent("keyweave.log")
-            let previous = directory.appendingPathComponent("keyweave.1.log")
+            let active = directory.appendingPathComponent("keytypist.log")
+            let previous = directory.appendingPathComponent("keytypist.1.log")
             let log = Log(directory: directory)
             log.info(String(repeating: "A", count: Int(Log.maxBytes) + 1) + "\nsynthetic periodic tail")
             log.flush()
@@ -103,7 +103,7 @@ final class LogTests: XCTestCase {
 
     private func withDirectory(_ body: (URL) throws -> Void) throws {
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("keyweave-log-tests-\(UUID())", isDirectory: true)
+            .appendingPathComponent("keytypist-log-tests-\(UUID())", isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
         defer { try? FileManager.default.removeItem(at: directory) }
         try body(directory)

@@ -5,7 +5,7 @@ Use one long-lived branch, `main`, and focused `docs/*`, `feat/*` or `fix/*` bra
 1. Fetch the fork and `https://github.com/nilava/TabType` before starting. Read `AGENTS.md`, `CONTEXT.md` and the current issue/PR. Preserve unrelated work and inspect existing worktrees.
 2. Use a focused issue with the problem, outcome, evidence and a few observable acceptance criteria. A source claim is not a reproduced bug.
 3. Work in a separate worktree/branch. Add regression tests before behavior changes and keep upstream MIT/third-party notices.
-4. Open a draft pull request **against `DevAnuhas/keyweave`**, not the upstream project. List actual tests, Mac journeys not run, raw-evidence locations kept outside git, and the affected capability-matrix rows.
+4. Open a draft pull request **against `DevAnuhas/keytypist`**, not the upstream project. List actual tests, Mac journeys not run, raw-evidence locations kept outside git, and the affected capability-matrix rows.
 5. Record test counts/logs/SHAs in the PR or a local evidence record, not as growing appendices in canonical agent guidance.
 6. Stop before merge or publication unless explicitly authorized. A request to build is not permission to publish a release or spend on signing/tools/API calls.
 

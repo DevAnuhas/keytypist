@@ -7,7 +7,7 @@ if [ "${1:-}" = --help ]; then
     cat <<'USAGE'
 Usage: SIGN_IDENTITY=... DEVELOPMENT_TEAM=... KEYCHAIN_PROFILE=... Scripts/release.sh
 Build/sign the arm64 app, notarize/staple it, create ZIP/DMG, notarize/staple the
-DMG, calculate final checksums and generate the signed update feed. The KeyWeave
+DMG, calculate final checksums and generate the signed update feed. The KeyTypist
 Sparkle signing key must already exist in the login Keychain. Receipts stay outside git. A timeout stops
 the pipeline; use the printed notarize.sh --resume command, then package.sh.
 This does not install, launch, tag, push or publish anything to GitHub.
@@ -19,11 +19,11 @@ fi
 [[ "${DEVELOPMENT_TEAM:-}" =~ ^[A-Z0-9]{10}$ ]] || fail 'Release requires DEVELOPMENT_TEAM.'
 [ -n "${KEYCHAIN_PROFILE:-}" ] || fail 'Release requires an existing KEYCHAIN_PROFILE; never pass credentials.'
 RELEASE=1 CONFIG=Release "$ROOT/Scripts/build.sh" app
-"$ROOT/Scripts/notarize.sh" app "$ROOT/dist/KeyWeave.app"
+"$ROOT/Scripts/notarize.sh" app "$ROOT/dist/KeyTypist.app"
 "$ROOT/Scripts/package.sh"
-version="$(plutil -extract CFBundleShortVersionString raw -o - "$ROOT/dist/KeyWeave.app/Contents/Info.plist")"
-"$ROOT/Scripts/notarize.sh" dmg "$ROOT/dist/KeyWeave-$version-arm64.dmg"
+version="$(plutil -extract CFBundleShortVersionString raw -o - "$ROOT/dist/KeyTypist.app/Contents/Info.plist")"
+"$ROOT/Scripts/notarize.sh" dmg "$ROOT/dist/KeyTypist-$version-arm64.dmg"
 "$ROOT/Scripts/package.sh" --verify
-appcast_arguments=(--app "$ROOT/dist/KeyWeave.app" --archive "$ROOT/dist/KeyWeave-$version-arm64.dmg")
+appcast_arguments=(--app "$ROOT/dist/KeyTypist.app" --archive "$ROOT/dist/KeyTypist-$version-arm64.dmg")
 if [ -n "${RELEASE_NOTES_FILE:-}" ]; then appcast_arguments+=(--notes "$RELEASE_NOTES_FILE"); fi
 python3 "$ROOT/Scripts/appcast.py" "${appcast_arguments[@]}"

@@ -2,9 +2,9 @@ import Foundation
 import TabTypeKit
 
 /// Lightweight file logger for diagnosing behavior in specific apps without a
-/// debugger. Writes to Keyweave's own log directory. Verbose entries are
+/// debugger. Writes to Keytypist's own log directory. Verbose entries are
 /// gated by `verbose` so normal runs stay quiet. The file is capped: past
-/// `maxBytes` its newest `keptBytes` move to keyweave.1.log and it starts over,
+/// `maxBytes` its newest `keptBytes` move to keytypist.1.log and it starts over,
 /// so the log (which holds typed text when verbose) never piles up.
 final class Log: @unchecked Sendable {
     static let shared = Log()
@@ -21,8 +21,8 @@ final class Log: @unchecked Sendable {
     static let keptBytes = 1024 * 1024
 
     init(directory: URL = AppPaths.current.logsDirectory) {
-        url = directory.appendingPathComponent("keyweave.log")
-        previousURL = directory.appendingPathComponent("keyweave.1.log")
+        url = directory.appendingPathComponent("keytypist.log")
+        previousURL = directory.appendingPathComponent("keytypist.1.log")
         formatter = DateFormatter()
         formatter.dateFormat = "HH:mm:ss.SSS"
     }

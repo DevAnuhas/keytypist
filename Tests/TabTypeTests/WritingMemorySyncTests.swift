@@ -7,7 +7,7 @@ import XCTest
 @MainActor
 final class WritingMemorySyncTests: XCTestCase {
     func testLearnedContinuationDisappearsImmediatelyOnOptOutAndErase() async throws {
-        let root = FileManager.default.temporaryDirectory.appendingPathComponent("KeyWeave-learning-hint-\(UUID())")
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("KeyTypist-learning-hint-\(UUID())")
         defer { try? FileManager.default.removeItem(at: root) }
         var optedIn = true
         let store = WritingStore(directory: root, collectionEnabled: { optedIn })
@@ -37,7 +37,7 @@ final class WritingMemorySyncTests: XCTestCase {
     }
 
     func testNewWritingFilesAndDirectoryArePrivate() throws {
-        let root = FileManager.default.temporaryDirectory.appendingPathComponent("KeyWeave-private-writing-\(UUID())")
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("KeyTypist-private-writing-\(UUID())")
         defer { try? FileManager.default.removeItem(at: root) }
         let store = WritingStore(directory: root, collectionEnabled: { true })
         store.record("Synthetic newly created writing must use private local files.",
@@ -50,13 +50,13 @@ final class WritingMemorySyncTests: XCTestCase {
     }
 
     func testDisabledSyncGettersAndDirectMethodsNeverReachKeychainOrCloud() throws {
-        let name = "dev.anuhas.keyweave.test.memory-sync.\(UUID())"
+        let name = "dev.anuhas.keytypist.test.memory-sync.\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: name))
         defer { defaults.removePersistentDomain(forName: name) }
         defaults.set(false, forKey: "syncEnabled")
         defaults.set("Synthetic author", forKey: "authorName")
         let before = try XCTUnwrap(defaults.persistentDomain(forName: name)) as NSDictionary
-        let home = FileManager.default.temporaryDirectory.appendingPathComponent("KeyWeave-disabled-sync-\(UUID())")
+        let home = FileManager.default.temporaryDirectory.appendingPathComponent("KeyTypist-disabled-sync-\(UUID())")
         defer { try? FileManager.default.removeItem(at: home) }
         var keyReads = 0
         var keyWrites = 0
@@ -84,7 +84,7 @@ final class WritingMemorySyncTests: XCTestCase {
     }
 
     func testEraseWhileOptedOutSurvivesRestartAndRejectsStaleWriting() throws {
-        let root = FileManager.default.temporaryDirectory.appendingPathComponent("KeyWeave-erased-writing-\(UUID())")
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("KeyTypist-erased-writing-\(UUID())")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false)
         defer { try? FileManager.default.removeItem(at: root) }
         var optedIn = true
@@ -110,7 +110,7 @@ final class WritingMemorySyncTests: XCTestCase {
 
     func testUnreadableStoresRemainUnchangedAndReportRecoveryError() throws {
         for malformedKey in [true, false] {
-            let root = FileManager.default.temporaryDirectory.appendingPathComponent("KeyWeave-invalid-writing-\(UUID())")
+            let root = FileManager.default.temporaryDirectory.appendingPathComponent("KeyTypist-invalid-writing-\(UUID())")
             try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false)
             defer { try? FileManager.default.removeItem(at: root) }
             let key = malformedKey ? Data("synthetic malformed key".utf8) : Data(repeating: 7, count: 32)
@@ -129,7 +129,7 @@ final class WritingMemorySyncTests: XCTestCase {
     }
 
     func testOptedInWritingSurvivesRestartEncryptedAndNeverConsumesImport() throws {
-        let root = FileManager.default.temporaryDirectory.appendingPathComponent("KeyWeave-writing-\(UUID())")
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("KeyTypist-writing-\(UUID())")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false)
         defer { try? FileManager.default.removeItem(at: root) }
         let pending = Data("{\"text\":\"Synthetic import must never be consumed.\"}\n".utf8)

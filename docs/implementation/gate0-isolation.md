@@ -1,6 +1,8 @@
 # Gate 0 isolation
 
-Status: merged through [PR #3](https://github.com/DevAnuhas/keyweave/pull/3), [#4](https://github.com/DevAnuhas/keyweave/pull/4), [#5](https://github.com/DevAnuhas/keyweave/pull/5) and [#6](https://github.com/DevAnuhas/keyweave/pull/6) on 2026-10-29. The validated Gate 0 tree at `710d35fe649a39947f4911aa3f7d8be309c180c5` is byte-identical to merged main `9ef5dd2c02c57435f5653e69c6b658cc6a5b832d`. This report records Gate 0.1–0.4; follow-on [AX-context correctness work](ax-context-fallback.md) has its own scope and evidence. Upstream MIT attribution and internal Swift module/target names remain intact. No release, paid service or Cotypist decompilation is part of this work.
+> Recorded under the product's former name, KeyWeave (renamed KeyTypist). Product names, paths, identifiers and hashes below are as measured at the time; only repository links were updated.
+
+Status: merged through [PR #3](https://github.com/DevAnuhas/keytypist/pull/3), [#4](https://github.com/DevAnuhas/keytypist/pull/4), [#5](https://github.com/DevAnuhas/keytypist/pull/5) and [#6](https://github.com/DevAnuhas/keytypist/pull/6) on 2026-10-29. The validated Gate 0 tree at `710d35fe649a39947f4911aa3f7d8be309c180c5` is byte-identical to merged main `9ef5dd2c02c57435f5653e69c6b658cc6a5b832d`. This report records Gate 0.1–0.4; follow-on [AX-context correctness work](ax-context-fallback.md) has its own scope and evidence. Upstream MIT attribution and internal Swift module/target names remain intact. No release, paid service or Cotypist decompilation is part of this work.
 
 ## Implemented boundary
 

@@ -19,7 +19,7 @@ enum AppPreferences {
     static let current = makeCurrent()
 
     static func domain(environment: [String: String] = ProcessInfo.processInfo.environment) -> String {
-        guard let home = environment["KEYWEAVE_TEST_HOME"], home.hasPrefix("/") else {
+        guard let home = environment["KEYTYPIST_TEST_HOME"], home.hasPrefix("/") else {
             return ProductIdentity.preferencesDomain
         }
         let path = URL(fileURLWithPath: home, isDirectory: true).standardizedFileURL.path

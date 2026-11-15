@@ -2,7 +2,7 @@ import Combine
 import Foundation
 import TabTypeKit
 
-/// The bundled catalog and model files in Keyweave's namespace. Construction
+/// The bundled catalog and model files in Keytypist's namespace. Construction
 /// and Settings getters are passive; startup loads only an installed selection.
 @MainActor
 final class LlamaModelManager: ObservableObject {
