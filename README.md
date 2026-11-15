@@ -1,11 +1,11 @@
-<p align="center"><img src="Resources/Branding/KeyWeaveIcon.png" alt="KeyWeave app icon" width="160"></p>
+<p align="center"><img src="Resources/Branding/KeyTypistIcon.png" alt="KeyTypist app icon" width="160"></p>
 
-# KeyWeave
+# KeyTypist
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-3b82f6" alt="MIT License"></a>
-  <a href="https://github.com/DevAnuhas/keyweave/releases/latest"><img src="https://img.shields.io/github/v/release/DevAnuhas/keyweave?color=a99bff" alt="Latest release"></a>
-  <a href="https://github.com/DevAnuhas/keyweave/releases"><img src="https://img.shields.io/github/downloads/DevAnuhas/keyweave/total?color=5b6de6" alt="Release downloads"></a>
+  <a href="https://github.com/DevAnuhas/keytypist/releases/latest"><img src="https://img.shields.io/github/v/release/DevAnuhas/keytypist?color=a99bff" alt="Latest release"></a>
+  <a href="https://github.com/DevAnuhas/keytypist/releases"><img src="https://img.shields.io/github/downloads/DevAnuhas/keytypist/total?color=5b6de6" alt="Release downloads"></a>
   <a href="#install"><img src="https://img.shields.io/badge/macOS-14%2B-20232d?logo=apple&amp;logoColor=white" alt="Requires macOS 14 or later"></a>
   <a href="#install"><img src="https://img.shields.io/badge/Architecture-Apple%20Silicon-5b6de6" alt="Apple Silicon"></a>
   <a href="docs/runbooks/releasing.md"><img src="https://img.shields.io/badge/Distribution-Signed%20%26%20Notarized-20a77a" alt="Developer ID signed and Apple notarized"></a>
@@ -13,13 +13,13 @@
 
 An open-source, on-device macOS writing assistant built from [TabType](https://github.com/nilava/TabType). Application code is MIT-licensed; bundled runtime and data retain their own [notices](Sources/TabType/Resources/ThirdPartyNotices/README.md).
 
-[Download](https://github.com/DevAnuhas/keyweave/releases/latest) · [Project status](CONTEXT.md) · [Release instructions](docs/runbooks/releasing.md)
+[Download](https://github.com/DevAnuhas/keytypist/releases/latest) · [Project status](CONTEXT.md) · [Release instructions](docs/runbooks/releasing.md)
 
 ## Install
 
-Requires Apple Silicon and macOS 14 or later. Drag `KeyWeave.app` into Applications, open Setup, grant its own Accessibility permission and choose/download a local model. Models are not bundled; TabType/Cotypist data and permissions are not migrated.
+Requires Apple Silicon and macOS 14 or later. Drag `KeyTypist.app` into Applications, open Setup, grant its own Accessibility permission and choose/download a local model. Models are not bundled; TabType/Cotypist data and permissions are not migrated.
 
-Screen/clipboard context, screenshot appearance capture, learning, encrypted iCloud Drive sync and launch at login are available in Settings. Context, learning and sync are off by default and require local opt-in. Screen Recording is required for screenshots; eligible accessible conversation text can work without it. KeyWeave checks its signed update feed daily and offers in-app installation; use About → Check for Updates for a manual check. Versions through 2.3.0 need one manual upgrade to obtain the updater. Complete Cotypist Pro/Labs parity is unfinished.
+Screen/clipboard context, screenshot appearance capture, learning, encrypted iCloud Drive sync and launch at login are available in Settings. Context, learning and sync are off by default and require local opt-in. Screen Recording is required for screenshots; eligible accessible conversation text can work without it. KeyTypist checks its signed update feed daily and offers in-app installation; use About → Check for Updates for a manual check. KeyTypist was formerly KeyWeave; KeyWeave builds (2.4.0 and earlier) need a manual install of KeyTypist, which starts with new settings and permissions and does not import KeyWeave data. Complete Cotypist Pro/Labs parity is unfinished.
 
 ## Develop
 
@@ -31,11 +31,11 @@ Scripts/build.sh app
 
 The pinned llama XCFramework must already be cached before native tests. Development builds are separate from signed/notarized distribution builds; see the [release instructions](docs/runbooks/releasing.md).
 
-Start with [CONTEXT.md](CONTEXT.md), [working rules](AGENTS.md) and the [documentation index](docs/README.md). Internal modules remain `TabType`/`TabTypeKit`; the isolated `dev.anuhas.keyweave` namespaces stay stable.
+Start with [CONTEXT.md](CONTEXT.md), [working rules](AGENTS.md) and the [documentation index](docs/README.md). Internal modules remain `TabType`/`TabTypeKit`; the isolated `dev.anuhas.keytypist` namespaces stay stable.
 
 ## Inherited upstream README
 
-The following documentation describes upstream TabType. Its feature promises and install/update instructions do not describe the current KeyWeave release; fork guidance above takes precedence.
+The following documentation describes upstream TabType. Its feature promises and install/update instructions do not describe the current KeyTypist release; fork guidance above takes precedence.
 
 <div align="center">
 

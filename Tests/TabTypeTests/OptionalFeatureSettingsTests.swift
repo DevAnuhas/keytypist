@@ -5,7 +5,7 @@ import XCTest
 @MainActor
 final class OptionalFeatureSettingsTests: XCTestCase {
     func testLocalOptInsCanBeEnabledAndPersist() throws {
-        let domain = "dev.anuhas.keyweave.tests.optins.\(UUID())"
+        let domain = "dev.anuhas.keytypist.tests.optins.\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: domain))
         defer { defaults.removePersistentDomain(forName: domain); AppPolicyStore.userOverrides = [:] }
         defaults.set("Synthetic writer", forKey: "authorName")
@@ -30,7 +30,7 @@ final class OptionalFeatureSettingsTests: XCTestCase {
     }
 
     func testRemoteSettingsCannotGrantLocalConsentOrWeakenAppExclusions() throws {
-        let domain = "dev.anuhas.keyweave.tests.remote-consent.\(UUID())"
+        let domain = "dev.anuhas.keytypist.tests.remote-consent.\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: domain))
         defer { defaults.removePersistentDomain(forName: domain); AppPolicyStore.userOverrides = [:] }
         defaults.set("Synthetic writer", forKey: "authorName")
@@ -72,7 +72,7 @@ final class OptionalFeatureSettingsTests: XCTestCase {
     }
 
     func testPerAppRecipesCannotBypassGlobalOptOut() throws {
-        let domain = "dev.anuhas.keyweave.tests.effective-consent.\(UUID())"
+        let domain = "dev.anuhas.keytypist.tests.effective-consent.\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: domain))
         defer { defaults.removePersistentDomain(forName: domain); AppPolicyStore.userOverrides = [:] }
         defaults.set("Synthetic writer", forKey: "authorName")
@@ -94,7 +94,7 @@ final class OptionalFeatureSettingsTests: XCTestCase {
         XCTAssertFalse(engine.usesScreenContext(for: policy))
     }
     func testPrivacyRevisionChangesBeforeDeferredObserversRun() throws {
-        let domain = "dev.anuhas.keyweave.tests.privacy-revision.\(UUID())"
+        let domain = "dev.anuhas.keytypist.tests.privacy-revision.\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: domain))
         defer { defaults.removePersistentDomain(forName: domain); AppPolicyStore.userOverrides = [:] }
         let settings = AppSettings(defaults: defaults)
@@ -112,7 +112,7 @@ final class OptionalFeatureSettingsTests: XCTestCase {
     }
 
     func testAppAndDomainExclusionsNarrowContextAndLearningConsent() throws {
-        let domain = "dev.anuhas.keyweave.tests.scoped-consent.\(UUID())"
+        let domain = "dev.anuhas.keytypist.tests.scoped-consent.\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: domain))
         defer { defaults.removePersistentDomain(forName: domain); AppPolicyStore.userOverrides = [:] }
         let settings = AppSettings(defaults: defaults)

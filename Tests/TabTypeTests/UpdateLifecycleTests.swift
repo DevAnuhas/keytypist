@@ -79,8 +79,8 @@ final class UpdateLifecycleTests: XCTestCase {
     }
 
     func testOnlyTheSignedForkConfigurationCanActivateUpdates() {
-        func allows(id: String = "dev.anuhas.keyweave", app: Bool = true,
-                    feed: String = "https://raw.githubusercontent.com/DevAnuhas/keyweave/main/Updates/appcast.xml",
+        func allows(id: String = "dev.anuhas.keytypist", app: Bool = true,
+                    feed: String = "https://raw.githubusercontent.com/DevAnuhas/keytypist/main/Updates/appcast.xml",
                     key: String = "pc1gLnpongI0flX6p0FOVK509djxXgyrKN8rcMB4bRU=",
                     signed: Bool = true, verified: Bool = true, test: Bool = false) -> Bool {
             Updater.permits(bundleIdentifier: id, isApplication: app, feed: feed,

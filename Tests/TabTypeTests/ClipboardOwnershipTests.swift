@@ -5,7 +5,7 @@ import XCTest
 @MainActor
 final class ClipboardOwnershipTests: XCTestCase {
     func testDelayedPasteRestorePreservesANewerUserCopy() {
-        let board = NSPasteboard(name: .init("dev.anuhas.keyweave.test.\(UUID())"))
+        let board = NSPasteboard(name: .init("dev.anuhas.keytypist.test.\(UUID())"))
         defer { board.releaseGlobally() }
         board.setString("Original synthetic copy", forType: .string)
         var restore: (@MainActor () -> Void)?
@@ -22,7 +22,7 @@ final class ClipboardOwnershipTests: XCTestCase {
     }
 
     func testUnchangedPasteRestoresAllOriginalFormats() {
-        let board = NSPasteboard(name: .init("dev.anuhas.keyweave.test.\(UUID())"))
+        let board = NSPasteboard(name: .init("dev.anuhas.keytypist.test.\(UUID())"))
         defer { board.releaseGlobally() }
         let original = NSPasteboardItem()
         original.setString("Synthetic rich text", forType: .string)
@@ -37,7 +37,7 @@ final class ClipboardOwnershipTests: XCTestCase {
     }
 
     func testOverlappingPastesRestoreTheOriginalCopyRatherThanTheFirstSuggestion() {
-        let board = NSPasteboard(name: .init("dev.anuhas.keyweave.test.\(UUID())"))
+        let board = NSPasteboard(name: .init("dev.anuhas.keytypist.test.\(UUID())"))
         defer { board.releaseGlobally() }
         board.setString("Original synthetic copy", forType: .string)
         var restores: [@MainActor () -> Void] = []

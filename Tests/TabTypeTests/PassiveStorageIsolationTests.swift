@@ -6,11 +6,11 @@ import XCTest
 @MainActor
 final class PassiveStorageIsolationTests: XCTestCase {
     func testPreferencesReadOnlyTheirExplicitSyntheticDomain() throws {
-        let home = FileManager.default.temporaryDirectory.appendingPathComponent("Keyweave-Gate0-preferences-\(UUID())")
-        let environment = ["KEYWEAVE_TEST_HOME": home.path]
+        let home = FileManager.default.temporaryDirectory.appendingPathComponent("Keytypist-Gate0-preferences-\(UUID())")
+        let environment = ["KEYTYPIST_TEST_HOME": home.path]
         let domain = AppPreferences.domain(environment: environment)
         let defaults = AppPreferences.makeCurrent(environment: environment)
-        let fallbackDomain = "dev.anuhas.keyweave.test.fallback.\(UUID())"
+        let fallbackDomain = "dev.anuhas.keytypist.test.fallback.\(UUID())"
         let fallback = try XCTUnwrap(UserDefaults(suiteName: fallbackDomain))
         defer {
             defaults.removePersistentDomain(forName: domain)
@@ -40,18 +40,18 @@ final class PassiveStorageIsolationTests: XCTestCase {
             XCTAssertEqual(defaults.double(forKey: "number"), 0)
             XCTAssertTrue(defaults.dictionaryRepresentation().isEmpty)
         }
-        defaults.set("Keyweave synthetic preference", forKey: "text")
-        XCTAssertEqual(defaults.string(forKey: "text"), "Keyweave synthetic preference")
+        defaults.set("Keytypist synthetic preference", forKey: "text")
+        XCTAssertEqual(defaults.string(forKey: "text"), "Keytypist synthetic preference")
         XCTAssertEqual(fallback.persistentDomain(forName: fallbackDomain) as NSDictionary?, before)
-        XCTAssertTrue(domain.hasPrefix("dev.anuhas.keyweave.test."))
-        XCTAssertEqual(AppPreferences.domain(environment: ["KEYWEAVE_TEST_HOME": home.path + "/."]), domain)
-        XCTAssertNotEqual(AppPreferences.domain(environment: ["KEYWEAVE_TEST_HOME": home.appendingPathComponent("other").path]), domain)
-        XCTAssertEqual(AppPreferences.domain(environment: [:]), "dev.anuhas.keyweave")
+        XCTAssertTrue(domain.hasPrefix("dev.anuhas.keytypist.test."))
+        XCTAssertEqual(AppPreferences.domain(environment: ["KEYTYPIST_TEST_HOME": home.path + "/."]), domain)
+        XCTAssertNotEqual(AppPreferences.domain(environment: ["KEYTYPIST_TEST_HOME": home.appendingPathComponent("other").path]), domain)
+        XCTAssertEqual(AppPreferences.domain(environment: [:]), "dev.anuhas.keytypist")
         XCTAssertFalse(FileManager.default.fileExists(atPath: home.path))
     }
 
     func testSettingsServicesStayPassiveBeforeCaptureAndLoginBoundaries() async throws {
-        let home = FileManager.default.temporaryDirectory.appendingPathComponent("Keyweave-Gate0-services-\(UUID())")
+        let home = FileManager.default.temporaryDirectory.appendingPathComponent("Keytypist-Gate0-services-\(UUID())")
         defer { try? FileManager.default.removeItem(at: home) }
         let paths = AppPaths(homeDirectory: home)
         let upstreamLogs = home.appendingPathComponent("Library/Logs/TabType")
@@ -61,8 +61,8 @@ final class PassiveStorageIsolationTests: XCTestCase {
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         }
         try oldLog.write(to: upstreamLogs.appendingPathComponent("tabtype.log"))
-        try oversizedLog.write(to: paths.logsDirectory.appendingPathComponent("keyweave.log"))
-        let domain = "dev.anuhas.keyweave.test.services.\(UUID())"
+        try oversizedLog.write(to: paths.logsDirectory.appendingPathComponent("keytypist.log"))
+        let domain = "dev.anuhas.keytypist.test.services.\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: domain))
         defer { defaults.removePersistentDomain(forName: domain) }
         defaults.set(7, forKey: "stat_suggestionsShown")
@@ -99,14 +99,14 @@ final class PassiveStorageIsolationTests: XCTestCase {
         XCTAssertEqual(loginWrites, 0)
         XCTAssertEqual(defaults.persistentDomain(forName: domain) as NSDictionary?, before)
         XCTAssertEqual(try Data(contentsOf: upstreamLogs.appendingPathComponent("tabtype.log")), oldLog)
-        XCTAssertEqual(try Data(contentsOf: paths.logsDirectory.appendingPathComponent("keyweave.log")), oversizedLog)
-        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: paths.logsDirectory.path), ["keyweave.log"])
+        XCTAssertEqual(try Data(contentsOf: paths.logsDirectory.appendingPathComponent("keytypist.log")), oversizedLog)
+        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: paths.logsDirectory.path), ["keytypist.log"])
         XCTAssertFalse(FileManager.default.fileExists(atPath: home.appendingPathComponent("uncreated-log").path))
         XCTAssertFalse(FileManager.default.fileExists(atPath: paths.fitCapturesDirectory.path))
     }
 
     func testSettingsConstructionPreservesStoredPreferences() throws {
-        let domain = "dev.anuhas.keyweave.test.settings.\(UUID())"
+        let domain = "dev.anuhas.keytypist.test.settings.\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: domain))
         defer { defaults.removePersistentDomain(forName: domain) }
         defaults.set(0.123, forKey: "temperature") // Retired keys are not cleaned up implicitly.
@@ -123,14 +123,14 @@ final class PassiveStorageIsolationTests: XCTestCase {
     }
 
     func testSyncSettingsGettersAndDisabledLifecycleNeverReachSystemBoundaries() throws {
-        let domain = "dev.anuhas.keyweave.test.sync.\(UUID())"
+        let domain = "dev.anuhas.keytypist.test.sync.\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: domain))
         defer { defaults.removePersistentDomain(forName: domain) }
         defaults.set(false, forKey: "syncEnabled")
         defaults.set("Synthetic author", forKey: "authorName")
         defaults.set("synthetic preference sentinel", forKey: "sentinel")
         let before = try XCTUnwrap(defaults.persistentDomain(forName: domain)) as NSDictionary
-        let home = FileManager.default.temporaryDirectory.appendingPathComponent("Keyweave-Gate0-sync-\(UUID())")
+        let home = FileManager.default.temporaryDirectory.appendingPathComponent("Keytypist-Gate0-sync-\(UUID())")
         defer { try? FileManager.default.removeItem(at: home) }
         var keyReads = 0
         var keyWrites = 0
@@ -161,7 +161,7 @@ final class PassiveStorageIsolationTests: XCTestCase {
     }
 
     func testWritingConstructionGettersAndDisabledLifecycleLeaveSentinelsUntouched() throws {
-        let home = FileManager.default.temporaryDirectory.appendingPathComponent("Keyweave-Gate0-\(UUID())")
+        let home = FileManager.default.temporaryDirectory.appendingPathComponent("Keytypist-Gate0-\(UUID())")
         defer { try? FileManager.default.removeItem(at: home) }
         let upstream = home.appendingPathComponent("Library/Application Support/TabType")
         let current = AppPaths(homeDirectory: home).supportDirectory

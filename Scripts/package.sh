@@ -10,7 +10,7 @@ Usage: SIGN_IDENTITY=... DEVELOPMENT_TEAM=... Scripts/package.sh
 The app must already be Developer ID signed, Accepted and stapled. Run setup-dmg.sh
 once to provision pinned tooling. DMGBUILD_VENV may select an existing environment
 read-only; all three pinned versions are checked. The default environment is
-.build-keyweave/tools/dmgbuild. No signed-app FinderInfo flags are modified.
+.build-keytypist/tools/dmgbuild. No signed-app FinderInfo flags are modified.
 Notarize/staple the resulting DMG separately, then --verify checks both final assets,
 their mounted/extracted apps and writes SHA256SUMS.txt. No app is launched/installed.
 USAGE
@@ -27,33 +27,33 @@ if [ "$mode" = build ]; then
 fi
 DIST="$ROOT/dist"
 [ -d "$DIST" ] && [ ! -L "$DIST" ] || fail 'Expected a regular dist directory.'
-APP="$DIST/KeyWeave.app"
-[ -d "$APP" ] && [ ! -L "$APP" ] || fail 'Expected a regular KeyWeave.app bundle.'
+APP="$DIST/KeyTypist.app"
+[ -d "$APP" ] && [ ! -L "$APP" ] || fail 'Expected a regular KeyTypist.app bundle.'
 version="$(plutil -extract CFBundleShortVersionString raw -o - "$APP/Contents/Info.plist")"
 [[ "$version" =~ ^[0-9]+(\.[0-9]+){1,3}$ ]] || fail 'Unexpected app version.'
-ZIP="$DIST/KeyWeave-$version-arm64.zip"
-DMG="$DIST/KeyWeave-$version-arm64.dmg"
+ZIP="$DIST/KeyTypist-$version-arm64.zip"
+DMG="$DIST/KeyTypist-$version-arm64.dmg"
 if [ "$mode" = build ]; then
     [ ! -e "$DMG" ] && [ ! -L "$DMG" ] || fail 'DMG already exists; verify/resume it rather than overwriting a submitted artifact.'
 fi
-tool_environment="${DMGBUILD_VENV:-$ROOT/.build-keyweave/tools/dmgbuild}"
+tool_environment="${DMGBUILD_VENV:-$ROOT/.build-keytypist/tools/dmgbuild}"
 python="$tool_environment/bin/python3"
 dmgbuild="$tool_environment/bin/dmgbuild"
 [ -x "$python" ] && [ -x "$dmgbuild" ] || fail 'Run Scripts/setup-dmg.sh first, or select an existing pinned DMGBUILD_VENV.'
 export PYTHONDONTWRITEBYTECODE=1
 "$python" -c 'from importlib.metadata import version; assert all(version(name) == expected for name, expected in [("dmgbuild", "1.6.7"), ("ds-store", "1.3.3"), ("mac-alias", "2.2.3")]), "Run Scripts/setup-dmg.sh: unexpected DMG tool versions"'
-app_requirement="=anchor apple generic and identifier \"dev.anuhas.keyweave\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists and certificate leaf[subject.OU] = \"$team\""
-dmg_requirement="=anchor apple generic and identifier \"dev.anuhas.keyweave.dmg\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists and certificate leaf[subject.OU] = \"$team\""
+app_requirement="=anchor apple generic and identifier \"dev.anuhas.keytypist\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists and certificate leaf[subject.OU] = \"$team\""
+dmg_requirement="=anchor apple generic and identifier \"dev.anuhas.keytypist.dmg\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists and certificate leaf[subject.OU] = \"$team\""
 verify_app() {
     local candidate="$1"
-    [ "$(plutil -extract CFBundleIdentifier raw -o - "$candidate/Contents/Info.plist")" = dev.anuhas.keyweave ] || fail 'Unexpected app bundle identity.'
-    [ "$(plutil -extract CFBundleExecutable raw -o - "$candidate/Contents/Info.plist")" = KeyWeave ] || fail 'Unexpected app executable.'
+    [ "$(plutil -extract CFBundleIdentifier raw -o - "$candidate/Contents/Info.plist")" = dev.anuhas.keytypist ] || fail 'Unexpected app bundle identity.'
+    [ "$(plutil -extract CFBundleExecutable raw -o - "$candidate/Contents/Info.plist")" = KeyTypist ] || fail 'Unexpected app executable.'
     [ "$(plutil -extract CFBundleShortVersionString raw -o - "$candidate/Contents/Info.plist")" = "$version" ] || fail 'App version changed while packaging.'
-    [ -f "$candidate/Contents/Resources/AppIcon.icns" ] || fail 'The KeyWeave app/volume icon is missing.'
+    [ -f "$candidate/Contents/Resources/AppIcon.icns" ] || fail 'The KeyTypist app/volume icon is missing.'
     codesign --verify --deep --strict --test-requirement "$app_requirement" "$candidate"
     xcrun stapler validate "$candidate"
     spctl --assess --type execute --verbose=4 "$candidate"
-    lipo "$candidate/Contents/MacOS/KeyWeave" -verify_arch arm64
+    lipo "$candidate/Contents/MacOS/KeyTypist" -verify_arch arm64
 }
 verify_app "$APP"
 lock="$DMG.lock"
@@ -98,9 +98,9 @@ cleanup() {
 trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
-stage="$(mktemp -d "$DIST/.KeyWeave-package.XXXXXXXX")"
+stage="$(mktemp -d "$DIST/.KeyTypist-package.XXXXXXXX")"
 if [ "$mode" = build ]; then
-    app="$stage/KeyWeave.app"
+    app="$stage/KeyTypist.app"
     ditto "$APP" "$app"
     ditto "$ROOT/LICENSE" "$stage/LICENSE"
     verify_app "$app" > "$stage/app-validation.log" 2>&1
@@ -117,7 +117,7 @@ PY
     # dmgbuild's temporary backing images stay inside this invocation's owned stage.
     TMPDIR="$stage/tmp" "$dmgbuild" -s "$ROOT/packaging/dmg/settings.py" \
         -D "app=$app" -D "resources=$ROOT/packaging/dmg" -D "license=$stage/LICENSE" \
-        "KeyWeave $version" "$stage/distribution.dmg" > "$stage/dmgbuild.log" 2>&1 || fail "dmgbuild failed; see $stage/dmgbuild.log."
+        "KeyTypist $version" "$stage/distribution.dmg" > "$stage/dmgbuild.log" 2>&1 || fail "dmgbuild failed; see $stage/dmgbuild.log."
     image="$stage/distribution.dmg"
 else
     [ -f "$DMG" ] && [ ! -L "$DMG" ] && [ -f "$ZIP" ] && [ ! -L "$ZIP" ] || fail 'Final ZIP/DMG must be regular files.'
@@ -132,22 +132,22 @@ else
     spctl --assess --type open --context context:primary-signature --verbose=4 "$image"
     mkdir "$stage/archive"
     ditto -x -k "$ZIP" "$stage/archive"
-    verify_app "$stage/archive/KeyWeave.app"
-    cmp "$APP/Contents/MacOS/KeyWeave" "$stage/archive/KeyWeave.app/Contents/MacOS/KeyWeave"
-    cmp "$APP/Contents/_CodeSignature/CodeResources" "$stage/archive/KeyWeave.app/Contents/_CodeSignature/CodeResources"
+    verify_app "$stage/archive/KeyTypist.app"
+    cmp "$APP/Contents/MacOS/KeyTypist" "$stage/archive/KeyTypist.app/Contents/MacOS/KeyTypist"
+    cmp "$APP/Contents/_CodeSignature/CodeResources" "$stage/archive/KeyTypist.app/Contents/_CodeSignature/CodeResources"
     cmp "$ROOT/LICENSE" "$stage/archive/LICENSE"
 fi
 hdiutil verify "$image" > "$stage/image-validation.log" 2>&1
 mkdir "$stage/verify"
 hdiutil attach -readonly -nobrowse -noautoopen -mountpoint "$stage/verify" -plist "$image" > "$stage/attach.plist" 2> "$stage/attach.stderr"
-verify_app "$stage/verify/KeyWeave.app" > "$stage/packaged-app-validation.log" 2>&1
-cmp "$APP/Contents/MacOS/KeyWeave" "$stage/verify/KeyWeave.app/Contents/MacOS/KeyWeave"
-cmp "$APP/Contents/_CodeSignature/CodeResources" "$stage/verify/KeyWeave.app/Contents/_CodeSignature/CodeResources"
+verify_app "$stage/verify/KeyTypist.app" > "$stage/packaged-app-validation.log" 2>&1
+cmp "$APP/Contents/MacOS/KeyTypist" "$stage/verify/KeyTypist.app/Contents/MacOS/KeyTypist"
+cmp "$APP/Contents/_CodeSignature/CodeResources" "$stage/verify/KeyTypist.app/Contents/_CodeSignature/CodeResources"
 cmp "$ROOT/LICENSE" "$stage/verify/License.txt"
 [ "$(readlink "$stage/verify/Applications")" = /Applications ] || fail 'DMG Applications link is incorrect.'
 cleanup_mounts || fail 'Cannot detach the verification image; refusing to publish.'
 if [ "$mode" = build ]; then
-    codesign --force --sign "$identity" --timestamp --identifier dev.anuhas.keyweave.dmg "$image" > "$stage/signing.log" 2>&1
+    codesign --force --sign "$identity" --timestamp --identifier dev.anuhas.keytypist.dmg "$image" > "$stage/signing.log" 2>&1
     codesign --verify --strict --test-requirement "$dmg_requirement" "$image" >> "$stage/signing.log" 2>&1
     codesign -d --verbose=4 "$image" >> "$stage/signing.log" 2>&1
     grep -q '^Timestamp=' "$stage/signing.log" || fail 'The DMG has no secure signing timestamp.'

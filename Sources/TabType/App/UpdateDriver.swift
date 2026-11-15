@@ -34,7 +34,7 @@ final class SparkleUpdateDriver: UpdateDriver {
 
     func start() throws {
         // Never send system profiling, including a persisted setting from an
-        // earlier build. Update checks use only the KeyWeave appcast.
+        // earlier build. Update checks use only the KeyTypist appcast.
         controller.updater.sendsSystemProfile = false
         try controller.updater.start()
     }

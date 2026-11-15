@@ -1,9 +1,9 @@
-"""Finder layout for the KeyWeave installer."""
+"""Finder layout for the KeyTypist installer."""
 from pathlib import Path
 
 app = Path(defines["app"])
 resources = Path(defines["resources"])
-files = [(str(app), "KeyWeave.app"), (defines["license"], "License.txt")]
+files = [(str(app), "KeyTypist.app"), (defines["license"], "License.txt")]
 symlinks = {"Applications": "/Applications"}
 format = "UDZO"
 filesystem = "HFS+"
@@ -22,7 +22,7 @@ icon_size = 80
 text_size = 13
 label_pos = "bottom"
 icon_locations = {
-    "KeyWeave.app": (150, 180),
+    "KeyTypist.app": (150, 180),
     "Applications": (450, 180),
     "License.txt": (520, 320),
 }

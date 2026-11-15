@@ -1,5 +1,5 @@
 #!/bin/bash
-# Internal Swift targets retain their upstream names. Public bundles are KeyWeave.
+# Internal Swift targets retain their upstream names. Public bundles are KeyTypist.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
@@ -38,11 +38,11 @@ if [ "$release" = 1 ]; then
     printf '%s\n' "$match" | grep -F 'Developer ID Application:' | grep -F "($TEAM)" >/dev/null || fail 'The requested Developer ID Application identity/private key is unavailable for the expected team.'
 else
     CONFIG="${CONFIG:-Debug}"
-    IDENTITY="${SIGN_IDENTITY:-Keyweave Dev}"
+    IDENTITY="${SIGN_IDENTITY:-Keytypist Dev}"
     if [ "$cmd" = app ] && ! security find-identity -v -p codesigning 2>/dev/null | grep -F -- "$IDENTITY" >/dev/null; then IDENTITY=-; fi
 fi
 export DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer}"
-BUILD_ROOT="$ROOT/.build-keyweave"
+BUILD_ROOT="$ROOT/.build-keytypist"
 DERIVED="$BUILD_ROOT/xcode"
 PRODUCTS="$DERIVED/Build/Products/$CONFIG"
 export CLANG_MODULE_CACHE_PATH="$BUILD_ROOT/clang-module-cache"
@@ -61,8 +61,8 @@ xcrun xcodebuild -scheme TabType -configuration "$CONFIG" \
     -skipPackagePluginValidation build
 [ ! -L "$ROOT/dist" ] || fail 'Refusing a symlink at dist.'
 mkdir -p "$ROOT/dist"
-stage="$(mktemp -d "$ROOT/dist/.KeyWeave-build.XXXXXXXX")"
-destination="$ROOT/dist/KeyWeave.app"
+stage="$(mktemp -d "$ROOT/dist/.KeyTypist-build.XXXXXXXX")"
+destination="$ROOT/dist/KeyTypist.app"
 cleanup() {
     local result=$?
     trap - EXIT
@@ -73,9 +73,9 @@ cleanup() {
 trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
-APP="$stage/KeyWeave.app"
+APP="$stage/KeyTypist.app"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$APP/Contents/Frameworks"
-cp "$PRODUCTS/TabType" "$APP/Contents/MacOS/KeyWeave"
+cp "$PRODUCTS/TabType" "$APP/Contents/MacOS/KeyTypist"
 LLAMA_FW="$(find "$PRODUCTS" -maxdepth 2 -name llama.framework -type d | head -1)"
 [ -n "$LLAMA_FW" ] || fail 'llama.framework is missing; refusing a broken app.'
 cp -R "$LLAMA_FW" "$APP/Contents/Frameworks/"
@@ -86,12 +86,12 @@ fi
 [ -n "$SPARKLE_FW" ] || fail 'Sparkle.framework is missing; refusing an app without its updater.'
 cp -R "$SPARKLE_FW" "$APP/Contents/Frameworks/"
 if [ "$release" = 1 ]; then
-    if ! otool -l "$APP/Contents/MacOS/KeyWeave" | grep -F '@executable_path/../Frameworks' >/dev/null; then
-        install_name_tool -add_rpath '@executable_path/../Frameworks' "$APP/Contents/MacOS/KeyWeave"
+    if ! otool -l "$APP/Contents/MacOS/KeyTypist" | grep -F '@executable_path/../Frameworks' >/dev/null; then
+        install_name_tool -add_rpath '@executable_path/../Frameworks' "$APP/Contents/MacOS/KeyTypist"
     fi
-    lipo "$APP/Contents/MacOS/KeyWeave" -verify_arch arm64
+    lipo "$APP/Contents/MacOS/KeyTypist" -verify_arch arm64
 else
-    install_name_tool -add_rpath '@executable_path/../Frameworks' "$APP/Contents/MacOS/KeyWeave" 2>/dev/null || true
+    install_name_tool -add_rpath '@executable_path/../Frameworks' "$APP/Contents/MacOS/KeyTypist" 2>/dev/null || true
 fi
 find "$PRODUCTS" -maxdepth 1 -name '*.bundle' -exec cp -R {} "$APP/Contents/Resources/" \;
 cp "$ROOT/Resources/Info.plist" "$APP/Contents/Info.plist"
@@ -99,13 +99,13 @@ if [ -f "$ROOT/Resources/AppIcon.icns" ]; then cp "$ROOT/Resources/AppIcon.icns"
 if [ -f "$ROOT/LICENSE" ]; then cp "$ROOT/LICENSE" "$APP/Contents/Resources/LICENSE"; fi
 if [ "$release" = 1 ]; then
     [ -f "$APP/Contents/Resources/LICENSE" ] || fail 'MIT LICENSE is missing.'
-    [ "$(plutil -extract CFBundleIdentifier raw -o - "$APP/Contents/Info.plist")" = dev.anuhas.keyweave ] || fail 'Unexpected release bundle identifier.'
-    [ "$(plutil -extract CFBundleExecutable raw -o - "$APP/Contents/Info.plist")" = KeyWeave ] || fail 'Unexpected release executable.'
+    [ "$(plutil -extract CFBundleIdentifier raw -o - "$APP/Contents/Info.plist")" = dev.anuhas.keytypist ] || fail 'Unexpected release bundle identifier.'
+    [ "$(plutil -extract CFBundleExecutable raw -o - "$APP/Contents/Info.plist")" = KeyTypist ] || fail 'Unexpected release executable.'
     # Refuse new nested code until its signing order/entitlements are deliberate.
     while IFS= read -r -d '' candidate; do
         if [[ "$(file -b "$candidate")" == *Mach-O* ]]; then
             case "$candidate" in
-                "$APP/Contents/MacOS/KeyWeave"|"$APP/Contents/Frameworks/llama.framework/llama"|"$APP/Contents/Frameworks/llama.framework/Versions/"*/llama) ;;
+                "$APP/Contents/MacOS/KeyTypist"|"$APP/Contents/Frameworks/llama.framework/llama"|"$APP/Contents/Frameworks/llama.framework/Versions/"*/llama) ;;
                 "$APP/Contents/Frameworks/Sparkle.framework/Versions/"*/Sparkle|\
                 "$APP/Contents/Frameworks/Sparkle.framework/Versions/"*/Autoupdate|\
                 "$APP/Contents/Frameworks/Sparkle.framework/Versions/"*/Updater.app/Contents/MacOS/Updater|\
@@ -126,11 +126,11 @@ for helper in XPCServices/Downloader.xpc XPCServices/Installer.xpc Autoupdate Up
     codesign "${sign_arguments[@]}" --preserve-metadata=entitlements "$sparkle/Versions/Current/$helper"
 done
 codesign "${sign_arguments[@]}" "$sparkle"
-codesign "${sign_arguments[@]}" --identifier dev.anuhas.keyweave \
+codesign "${sign_arguments[@]}" --identifier dev.anuhas.keytypist \
     --entitlements "$ROOT/Resources/TabType.entitlements" "$APP"
 codesign --verify --deep --strict --verbose=2 "$APP"
 if [ "$release" = 1 ]; then
-    requirement="=anchor apple generic and identifier \"dev.anuhas.keyweave\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists and certificate leaf[subject.OU] = \"$TEAM\""
+    requirement="=anchor apple generic and identifier \"dev.anuhas.keytypist\" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists and certificate leaf[subject.OU] = \"$TEAM\""
     codesign --verify --strict --test-requirement "$requirement" "$APP"
     framework_requirement="=anchor apple generic and certificate leaf[field.1.2.840.113635.100.6.1.13] exists and certificate leaf[subject.OU] = \"$TEAM\""
     codesign --verify --strict --test-requirement "$framework_requirement" "$APP/Contents/Frameworks/llama.framework"

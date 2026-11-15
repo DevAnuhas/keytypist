@@ -1,7 +1,7 @@
 import SwiftUI
 import Combine
 
-/// What KeyWeave is allowed to read for extra context, grouped the way Cotypist's own
+/// What KeyTypist is allowed to read for extra context, grouped the way Cotypist's own
 /// Context pane is (Screenshot Settings / Clipboard Settings) rather than folded into
 /// Personalization.
 struct ContextPane: View {
@@ -133,7 +133,7 @@ struct ShortcutsPane: View {
                 KeyRecorderRow(title: "Word alternatives", binding: $settings.wordAlternativesKey)
                 KeyRecorderRow(title: "Force a suggestion", binding: $settings.forceActivateKey)
                 KeyRecorderRow(title: "Pause in current app (5 min)", binding: $settings.appPauseKey)
-                KeyRecorderRow(title: "Enable/disable KeyWeave", binding: $settings.toggleKey, allowNone: true)
+                KeyRecorderRow(title: "Enable/disable KeyTypist", binding: $settings.toggleKey, allowNone: true)
                 Text("Hold ⌥ with the accept key to send the real key to the app (e.g. ⌥Tab moves between form fields while a suggestion is shown).")
                     .font(.caption).foregroundStyle(.secondary)
             }
@@ -290,7 +290,7 @@ struct PersonalizationPane: View {
                     .font(.caption).foregroundStyle(.secondary)
                 Toggle("Record text even when you accept no suggestion", isOn: $settings.recordWithoutAccepts)
                     .disabled(!settings.collectTypingHistory)
-                Text("Off: KeyWeave only learns from messages where you used at least one suggestion.")
+                Text("Off: KeyTypist only learns from messages where you used at least one suggestion.")
                     .font(.caption).foregroundStyle(.secondary)
                 LearnedWritingRow()
             }
@@ -404,7 +404,7 @@ struct StatisticsPane: View {
 /// Experimental, opt-in features that may change or be removed.
 
 
-/// Sparkle checks the signed KeyWeave feed and owns the installation UI.
+/// Sparkle checks the signed KeyTypist feed and owns the installation UI.
 struct UpdatesSection: View {
     @ObservedObject private var updater = Updater.shared
 
@@ -419,13 +419,13 @@ struct UpdatesSection: View {
             if let date = updater.lastCheckDate {
                 LabeledContent("Last checked", value: date.formatted(date: .abbreviated, time: .shortened))
             }
-            Text("Checks daily and shows a prompt when an update is available. Choose Install Update to download, install and relaunch KeyWeave.")
+            Text("Checks daily and shows a prompt when an update is available. Choose Install Update to download, install and relaunch KeyTypist.")
                 .font(.caption).foregroundStyle(.secondary)
             if let failure = updater.failure {
                 Text("Updates could not start: \(failure)").foregroundStyle(.red)
                 Button("Retry") { updater.start() }
             } else if !updater.isAvailable {
-                Text("Update checks are available in the signed KeyWeave app.")
+                Text("Update checks are available in the signed KeyTypist app.")
                     .font(.caption).foregroundStyle(.secondary)
             }
         }
@@ -444,7 +444,7 @@ struct AboutPane: View {
                                 .frame(width: 48, height: 48)
                         }
                         VStack(alignment: .leading) {
-                            Text("KeyWeave").font(.title2).bold()
+                            Text("KeyTypist").font(.title2).bold()
                             Text("Open-source, on-device autocomplete for macOS.")
                                 .font(.callout).foregroundStyle(.secondary)
                         }
@@ -461,7 +461,7 @@ struct AboutPane: View {
                       systemImage: "key.slash")
             }
             Section("Open source") {
-                Text("KeyWeave is an MIT-licensed fork of TabType. Upstream copyright and third-party acknowledgments are preserved.")
+                Text("KeyTypist is an MIT-licensed fork of TabType. Upstream copyright and third-party acknowledgments are preserved.")
                     .font(.callout).foregroundStyle(.secondary)
             }
             Section("Third-party acknowledgments") {
@@ -490,7 +490,7 @@ struct AboutPane: View {
 }
 
 
-/// How much writing KeyWeave has learned from, with an erase button.
+/// How much writing KeyTypist has learned from, with an erase button.
 private struct LearnedWritingRow: View {
     @ObservedObject private var store = WritingStore.shared
     @State private var confirming = false
@@ -509,7 +509,7 @@ private struct LearnedWritingRow: View {
                 Text(store.status).font(.caption).foregroundStyle(.secondary)
             }
         }
-        .confirmationDialog("Erase everything KeyWeave learned from your writing?", isPresented: $confirming) {
+        .confirmationDialog("Erase everything KeyTypist learned from your writing?", isPresented: $confirming) {
             Button("Erase", role: .destructive) {
                 store.eraseAll()
                 NotificationCenter.default.post(name: .tabTypePrivacyChanged, object: nil)

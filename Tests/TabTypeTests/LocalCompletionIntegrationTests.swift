@@ -7,14 +7,14 @@ import XCTest
 @MainActor
 final class LocalCompletionIntegrationTests: XCTestCase {
     func testInstalledCatalogModelStartsAndCompletesSyntheticWriting() async throws {
-        guard let path = ProcessInfo.processInfo.environment["KEYWEAVE_TEST_MODEL"], path.hasPrefix("/") else {
-            throw XCTSkip("Opt in with KEYWEAVE_TEST_MODEL pointing to a verified model outside git")
+        guard let path = ProcessInfo.processInfo.environment["KEYTYPIST_TEST_MODEL"], path.hasPrefix("/") else {
+            throw XCTSkip("Opt in with KEYTYPIST_TEST_MODEL pointing to a verified model outside git")
         }
         let source = URL(fileURLWithPath: path)
         let catalog = try ModelCatalog.bundled()
         let entry = try XCTUnwrap(catalog.models.first { $0.fileName == source.lastPathComponent })
         let home = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        let domain = "dev.anuhas.keyweave.tests.local-completion.\(UUID())"
+        let domain = "dev.anuhas.keytypist.tests.local-completion.\(UUID())"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: domain))
         defer {
             defaults.removePersistentDomain(forName: domain)

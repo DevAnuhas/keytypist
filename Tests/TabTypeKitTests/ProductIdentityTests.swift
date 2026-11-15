@@ -3,13 +3,13 @@ import XCTest
 import TabTypeKit
 
 final class ProductIdentityTests: XCTestCase {
-    func testAppBundleAndPersistentIdentitiesBelongToKeyweave() throws {
-        XCTAssertEqual(ProductIdentity.name, "KeyWeave")
-        XCTAssertEqual(ProductIdentity.bundleIdentifier, "dev.anuhas.keyweave")
-        XCTAssertEqual(ProductIdentity.preferencesDomain, "dev.anuhas.keyweave")
-        XCTAssertEqual(ProductIdentity.keychainService, "dev.anuhas.keyweave.sync")
-        XCTAssertEqual(ProductIdentity.syncFolderName, "Keyweave Sync")
-        XCTAssertEqual(ProductIdentity.syncFileExtension, "keyweavesync")
+    func testAppBundleAndPersistentIdentitiesBelongToKeytypist() throws {
+        XCTAssertEqual(ProductIdentity.name, "KeyTypist")
+        XCTAssertEqual(ProductIdentity.bundleIdentifier, "dev.anuhas.keytypist")
+        XCTAssertEqual(ProductIdentity.preferencesDomain, "dev.anuhas.keytypist")
+        XCTAssertEqual(ProductIdentity.keychainService, "dev.anuhas.keytypist.sync")
+        XCTAssertEqual(ProductIdentity.syncFolderName, "Keytypist Sync")
+        XCTAssertEqual(ProductIdentity.syncFileExtension, "keytypistsync")
 
         let data = try Data(contentsOf: repositoryRoot.appendingPathComponent("Resources/Info.plist"))
         let plist = try XCTUnwrap(PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any])
@@ -23,7 +23,7 @@ final class ProductIdentityTests: XCTestCase {
 
     func testConstructingPathsAndReadingEveryGetterLeavesSyntheticStoresUntouched() throws {
         let manager = FileManager.default
-        let home = manager.temporaryDirectory.appendingPathComponent("keyweave-paths-\(UUID().uuidString)", isDirectory: true)
+        let home = manager.temporaryDirectory.appendingPathComponent("keytypist-paths-\(UUID().uuidString)", isDirectory: true)
         defer { try? manager.removeItem(at: home) }
         let sentinelPaths = [
             "Library/Application Support/TabType/Models/upstream-sentinel",
@@ -41,24 +41,24 @@ final class ProductIdentityTests: XCTestCase {
 
         let paths = AppPaths(homeDirectory: home)
         XCTAssertEqual(paths.homeDirectory, home)
-        XCTAssertEqual(paths.supportDirectory.path, home.path + "/Library/Application Support/Keyweave")
-        XCTAssertEqual(paths.modelsDirectory.path, home.path + "/Library/Application Support/Keyweave/Models")
-        XCTAssertEqual(paths.cacheDirectory.path, home.path + "/Library/Caches/Keyweave")
-        XCTAssertEqual(paths.logsDirectory.path, home.path + "/Library/Logs/Keyweave")
-        XCTAssertEqual(paths.fitCapturesDirectory.path, home.path + "/Library/Logs/Keyweave/fit")
-        XCTAssertEqual(paths.syncDirectory.path, home.path + "/Library/Mobile Documents/com~apple~CloudDocs/Keyweave Sync")
+        XCTAssertEqual(paths.supportDirectory.path, home.path + "/Library/Application Support/Keytypist")
+        XCTAssertEqual(paths.modelsDirectory.path, home.path + "/Library/Application Support/Keytypist/Models")
+        XCTAssertEqual(paths.cacheDirectory.path, home.path + "/Library/Caches/Keytypist")
+        XCTAssertEqual(paths.logsDirectory.path, home.path + "/Library/Logs/Keytypist")
+        XCTAssertEqual(paths.fitCapturesDirectory.path, home.path + "/Library/Logs/Keytypist/fit")
+        XCTAssertEqual(paths.syncDirectory.path, home.path + "/Library/Mobile Documents/com~apple~CloudDocs/Keytypist Sync")
 
         XCTAssertEqual(try snapshot(home), before)
     }
 
     func testCurrentUsesTheExplicitSyntheticProcessHome() throws {
-        guard let home = ProcessInfo.processInfo.environment["KEYWEAVE_TEST_HOME"], home.hasPrefix("/") else {
-            throw XCTSkip("Run with an absolute KEYWEAVE_TEST_HOME to test the controlled process override")
+        guard let home = ProcessInfo.processInfo.environment["KEYTYPIST_TEST_HOME"], home.hasPrefix("/") else {
+            throw XCTSkip("Run with an absolute KEYTYPIST_TEST_HOME to test the controlled process override")
         }
         let expectedHome = URL(fileURLWithPath: home, isDirectory: true)
         XCTAssertEqual(AppPaths.current.homeDirectory, expectedHome)
         XCTAssertEqual(AppPaths.current.modelsDirectory,
-                       expectedHome.appendingPathComponent("Library/Application Support/Keyweave/Models", isDirectory: true))
+                       expectedHome.appendingPathComponent("Library/Application Support/Keytypist/Models", isDirectory: true))
     }
 
     func testReleaseHelperRefusesBeforeChangingFilesOrInvokingDistributionTools() throws {
@@ -71,16 +71,16 @@ final class ProductIdentityTests: XCTestCase {
         try manager.copyItem(at: repositoryRoot.appendingPathComponent("Resources/Info.plist"), to: plist)
         let originalPlist = try Data(contentsOf: plist)
         let calls = fixture.appendingPathComponent("tool-calls")
-        let toolStub = "#!/bin/bash\nprintf '%s\\n' \"$0 $*\" >> \"$KEYWEAVE_TEST_CALLS\"\necho 1\n"
+        let toolStub = "#!/bin/bash\nprintf '%s\\n' \"$0 $*\" >> \"$KEYTYPIST_TEST_CALLS\"\necho 1\n"
         for name in ["plutil", "codesign", "hdiutil", "security", "xcrun", "swift"] {
             try writeExecutable(toolStub, at: fixture.appendingPathComponent("bin/\(name)"))
         }
-        try writeExecutable("#!/bin/bash\nprintf 'build called\\n' >> \"$KEYWEAVE_TEST_CALLS\"\nexit 90\n",
+        try writeExecutable("#!/bin/bash\nprintf 'build called\\n' >> \"$KEYTYPIST_TEST_CALLS\"\nexit 90\n",
                             at: fixture.appendingPathComponent("Scripts/build.sh"))
         let before = try snapshot(fixture)
 
         let result = try runScript(script, arguments: [], fixture: fixture,
-                                   environment: ["KEYWEAVE_TEST_CALLS": calls.path])
+                                   environment: ["KEYTYPIST_TEST_CALLS": calls.path])
 
         XCTAssertNotEqual(result.status, 0)
         XCTAssertTrue(result.output.contains("Release requires SIGN_IDENTITY"), result.output)
@@ -89,7 +89,7 @@ final class ProductIdentityTests: XCTestCase {
         XCTAssertEqual(try snapshot(fixture), before)
     }
 
-    func testBuildHelperPackagesInternalTargetWithIsolatedKeyweaveIdentityAndCaches() throws {
+    func testBuildHelperPackagesInternalTargetWithIsolatedKeytypistIdentityAndCaches() throws {
         let manager = FileManager.default
         let fixture = try makeFixture()
         defer { try? manager.removeItem(at: fixture) }
@@ -100,8 +100,8 @@ final class ProductIdentityTests: XCTestCase {
         let calls = fixture.appendingPathComponent("tool-calls")
         try writeExecutable("""
         #!/bin/bash
-        printf 'xcrun\\n' >> "$KEYWEAVE_TEST_CALLS"
-        printf '%s\\n' "$@" >> "$KEYWEAVE_TEST_CALLS"
+        printf 'xcrun\\n' >> "$KEYTYPIST_TEST_CALLS"
+        printf '%s\\n' "$@" >> "$KEYTYPIST_TEST_CALLS"
         derived=""
         config="Debug"
         while [ "$#" -gt 0 ]; do
@@ -120,26 +120,26 @@ final class ProductIdentityTests: XCTestCase {
         printf 'synthetic executable' > "$products/TabType"
         printf 'synthetic resource' > "$products/TabType_TabType.bundle/resource"
         """, at: fixture.appendingPathComponent("bin/xcrun"))
-        try writeExecutable("#!/bin/bash\necho '1) synthetic \"Keyweave Dev\"'\n",
+        try writeExecutable("#!/bin/bash\necho '1) synthetic \"Keytypist Dev\"'\n",
                             at: fixture.appendingPathComponent("bin/security"))
         for tool in ["codesign", "install_name_tool"] {
-            try writeExecutable("#!/bin/bash\nprintf '\(tool)\\n' >> \"$KEYWEAVE_TEST_CALLS\"\nprintf '%s\\n' \"$@\" >> \"$KEYWEAVE_TEST_CALLS\"\n",
+            try writeExecutable("#!/bin/bash\nprintf '\(tool)\\n' >> \"$KEYTYPIST_TEST_CALLS\"\nprintf '%s\\n' \"$@\" >> \"$KEYTYPIST_TEST_CALLS\"\n",
                                 at: fixture.appendingPathComponent("bin/\(tool)"))
         }
 
         let result = try runScript(script, arguments: ["app"], fixture: fixture,
-                                   environment: ["KEYWEAVE_TEST_CALLS": calls.path])
+                                   environment: ["KEYTYPIST_TEST_CALLS": calls.path])
 
         XCTAssertEqual(result.status, 0, result.output)
-        let app = fixture.appendingPathComponent("dist/KeyWeave.app")
-        let executable = app.appendingPathComponent("Contents/MacOS/KeyWeave")
+        let app = fixture.appendingPathComponent("dist/KeyTypist.app")
+        let executable = app.appendingPathComponent("Contents/MacOS/KeyTypist")
         XCTAssertTrue(manager.fileExists(atPath: executable.path), result.output)
         if manager.fileExists(atPath: executable.path) {
             XCTAssertEqual(try String(contentsOf: executable, encoding: .utf8), "synthetic executable")
             let data = try Data(contentsOf: app.appendingPathComponent("Contents/Info.plist"))
             let plist = try XCTUnwrap(PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any])
-            XCTAssertEqual(plist["CFBundleExecutable"] as? String, "KeyWeave")
-            XCTAssertEqual(plist["CFBundleIdentifier"] as? String, "dev.anuhas.keyweave")
+            XCTAssertEqual(plist["CFBundleExecutable"] as? String, "KeyTypist")
+            XCTAssertEqual(plist["CFBundleIdentifier"] as? String, "dev.anuhas.keytypist")
             XCTAssertEqual(try String(contentsOf: app.appendingPathComponent("Contents/Resources/TabType_TabType.bundle/resource"),
                                       encoding: .utf8), "synthetic resource")
         }
@@ -147,13 +147,13 @@ final class ProductIdentityTests: XCTestCase {
         XCTAssertFalse(manager.fileExists(atPath: fixture.appendingPathComponent(".build-xcode").path))
         let arguments = try String(contentsOf: calls, encoding: .utf8).components(separatedBy: "\n")
         XCTAssertTrue(arguments.contains("TabType"), "Internal target remains TabType")
-        XCTAssertTrue(arguments.contains("dev.anuhas.keyweave"))
-        XCTAssertTrue(arguments.contains("Keyweave Dev"))
+        XCTAssertTrue(arguments.contains("dev.anuhas.keytypist"))
+        XCTAssertTrue(arguments.contains("Keytypist Dev"))
         XCTAssertTrue(arguments.contains("-packageCachePath"))
         XCTAssertTrue(arguments.contains("-clonedSourcePackagesDirPath"))
         for option in ["-derivedDataPath", "-packageCachePath", "-clonedSourcePackagesDirPath"] {
             if let index = arguments.firstIndex(of: option), arguments.indices.contains(index + 1) {
-                XCTAssertTrue(arguments[index + 1].hasPrefix(fixture.path + "/.build-keyweave/"), option)
+                XCTAssertTrue(arguments[index + 1].hasPrefix(fixture.path + "/.build-keytypist/"), option)
             } else {
                 XCTFail("Missing isolated build option: \(option)")
             }
@@ -161,11 +161,11 @@ final class ProductIdentityTests: XCTestCase {
 
         try Data().write(to: calls)
         let adHoc = try runScript(script, arguments: ["app"], fixture: fixture, environment: [
-            "KEYWEAVE_TEST_CALLS": calls.path, "SIGN_IDENTITY": "Keyweave Synthetic Missing",
+            "KEYTYPIST_TEST_CALLS": calls.path, "SIGN_IDENTITY": "Keytypist Synthetic Missing",
         ])
         XCTAssertEqual(adHoc.status, 0, adHoc.output)
         let adHocArguments = try String(contentsOf: calls, encoding: .utf8).components(separatedBy: "\n")
-        XCTAssertTrue(adHocArguments.contains("dev.anuhas.keyweave"))
+        XCTAssertTrue(adHocArguments.contains("dev.anuhas.keytypist"))
         XCTAssertTrue(adHocArguments.contains("-"))
     }
 
@@ -176,11 +176,11 @@ final class ProductIdentityTests: XCTestCase {
         let script = fixture.appendingPathComponent("Scripts/build.sh")
         try manager.copyItem(at: repositoryRoot.appendingPathComponent("Scripts/build.sh"), to: script)
         let calls = fixture.appendingPathComponent("tool-calls")
-        try writeExecutable("#!/bin/bash\nprintf '%s\\n' \"$@\" >> \"$KEYWEAVE_TEST_CALLS\"\n",
+        try writeExecutable("#!/bin/bash\nprintf '%s\\n' \"$@\" >> \"$KEYTYPIST_TEST_CALLS\"\n",
                             at: fixture.appendingPathComponent("bin/swift"))
 
         let result = try runScript(script, arguments: ["eval"], fixture: fixture,
-                                   environment: ["KEYWEAVE_TEST_CALLS": calls.path])
+                                   environment: ["KEYTYPIST_TEST_CALLS": calls.path])
 
         XCTAssertEqual(result.status, 0, result.output)
         let arguments = try String(contentsOf: calls, encoding: .utf8).components(separatedBy: "\n")
@@ -188,12 +188,12 @@ final class ProductIdentityTests: XCTestCase {
         for option in ["--scratch-path", "--cache-path", "--config-path", "--security-path"] {
             let index = try XCTUnwrap(arguments.firstIndex(of: option), option)
             let path = try XCTUnwrap(arguments.dropFirst(index + 1).first, option)
-            XCTAssertTrue(path.hasPrefix(fixture.path + "/.build-keyweave/"), option)
+            XCTAssertTrue(path.hasPrefix(fixture.path + "/.build-keytypist/"), option)
         }
         XCTAssertFalse(manager.fileExists(atPath: fixture.appendingPathComponent(".build").path))
     }
 
-    func testSigningSetupRecognizesExistingKeyweaveIdentityWithoutChangingKeychainOrTrust() throws {
+    func testSigningSetupRecognizesExistingKeytypistIdentityWithoutChangingKeychainOrTrust() throws {
         let manager = FileManager.default
         let fixture = try makeFixture()
         defer { try? manager.removeItem(at: fixture) }
@@ -203,27 +203,27 @@ final class ProductIdentityTests: XCTestCase {
         try writeExecutable("""
         #!/bin/bash
         if [ "$1" = "find-identity" ]; then
-            echo '1) synthetic "Keyweave Dev"'
+            echo '1) synthetic "Keytypist Dev"'
             exit 0
         fi
-        printf 'unexpected keychain mutation\\n' >> "$KEYWEAVE_TEST_CALLS"
+        printf 'unexpected keychain mutation\\n' >> "$KEYTYPIST_TEST_CALLS"
         exit 90
         """, at: fixture.appendingPathComponent("bin/security"))
-        try writeExecutable("#!/bin/bash\nprintf 'unexpected certificate generation\\n' >> \"$KEYWEAVE_TEST_CALLS\"\nexit 91\n",
+        try writeExecutable("#!/bin/bash\nprintf 'unexpected certificate generation\\n' >> \"$KEYTYPIST_TEST_CALLS\"\nexit 91\n",
                             at: fixture.appendingPathComponent("bin/openssl"))
 
         let result = try runScript(script, arguments: [], fixture: fixture,
-                                   environment: ["KEYWEAVE_TEST_CALLS": calls.path])
+                                   environment: ["KEYTYPIST_TEST_CALLS": calls.path])
 
         XCTAssertEqual(result.status, 0, result.output)
-        XCTAssertTrue(result.output.contains("Keyweave Dev"), result.output)
+        XCTAssertTrue(result.output.contains("Keytypist Dev"), result.output)
         XCTAssertTrue(result.output.contains("already exists"), result.output)
-        XCTAssertFalse(manager.fileExists(atPath: calls.path), "Existing Keyweave identity needs no keychain or trust changes")
+        XCTAssertFalse(manager.fileExists(atPath: calls.path), "Existing Keytypist identity needs no keychain or trust changes")
     }
 
     private func makeFixture() throws -> URL {
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("keyweave-packaging-\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("keytypist-packaging-\(UUID().uuidString)", isDirectory: true)
         for directory in ["Scripts", "Resources", "bin"] {
             try FileManager.default.createDirectory(at: root.appendingPathComponent(directory), withIntermediateDirectories: true)
         }
@@ -243,7 +243,7 @@ final class ProductIdentityTests: XCTestCase {
         process.currentDirectoryURL = fixture
         process.environment = ProcessInfo.processInfo.environment.merging([
             "PATH": fixture.appendingPathComponent("bin").path + ":/usr/bin:/bin",
-            "KEYWEAVE_TEST_HOME": fixture.appendingPathComponent("synthetic-home").path,
+            "KEYTYPIST_TEST_HOME": fixture.appendingPathComponent("synthetic-home").path,
             "SIGN_IDENTITY": "",
             "CONFIG": "Debug",
             "RELEASE": "0",
