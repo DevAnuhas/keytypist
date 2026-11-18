@@ -10,6 +10,11 @@ guard CommandLine.arguments.count == 2 else {
     fatalError("Usage: swift scripts/make-dmg-background.swift OUTPUT_DIRECTORY")
 }
 let directory = URL(fileURLWithPath: CommandLine.arguments[1], isDirectory: true)
+// Single source for the words in the artwork. They are also embedded as PNG metadata so
+// Scripts/tests/test_dmg_background.py can tell when the committed images are stale.
+let title = "KeyTypist"
+let instruction = "Drag KeyTypist into Applications to install."
+let imageProperties = [kCGImagePropertyPNGDictionary: [kCGImagePropertyPNGDescription: "\(title) | \(instruction)"]] as CFDictionary
 try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
 for scale in [1, 2] {
     let context = CGContext(data: nil, width: 600 * scale, height: 400 * scale,
@@ -27,9 +32,9 @@ for scale in [1, 2] {
             withAttributes: [.font: NSFont.systemFont(ofSize: size, weight: weight),
                              .foregroundColor: color])
     }
-    text("KeyTypist", x: 36, top: 30, size: 26, weight: .semibold,
+    text(title, x: 36, top: 30, size: 26, weight: .semibold,
          color: NSColor(srgbRed: 0.13, green: 0.15, blue: 0.19, alpha: 1))
-    text("Drag KeyTypist into Applications to install.", x: 36, top: 70, size: 14,
+    text(instruction, x: 36, top: 70, size: 14,
          color: NSColor(srgbRed: 0.36, green: 0.39, blue: 0.43, alpha: 1))
     let arrow = NSBezierPath()
     arrow.move(to: NSPoint(x: 274, y: 220))
@@ -46,7 +51,7 @@ for scale in [1, 2] {
     let output = directory.appendingPathComponent(scale == 1 ? "background.png" : "background@2x.png")
     let data = NSMutableData()
     let destination = CGImageDestinationCreateWithData(data, UTType.png.identifier as CFString, 1, nil)!
-    CGImageDestinationAddImage(destination, context.makeImage()!, nil)
+    CGImageDestinationAddImage(destination, context.makeImage()!, imageProperties)
     guard CGImageDestinationFinalize(destination) else { fatalError("PNG encoding failed") }
     try (data as Data).write(to: output, options: .atomic)
     print(output.path)
