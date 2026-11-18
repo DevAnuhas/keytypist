@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><!-- sparkle-sign-warning:
+IMPORTANT: This file was signed by Sparkle. Any modifications to this file requires re-signing this file with generate_appcast or sign_update! The signed signature will be embedded at the end of this file.
+--><rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0"><channel><title>KeyTypist Updates</title><link>https://github.com/DevAnuhas/keytypist</link><description>Signed KeyTypist updates</description><item><title>KeyTypist 2.5.0</title><link>https://github.com/DevAnuhas/keytypist/releases/tag/v2.5.0</link><pubDate>Wed, 18 Nov 2026 17:46:22 GMT</pubDate><description>KeyWeave is now KeyTypist. This release renames the app and gives it its own identity and update feed.
+
+- Renamed from KeyWeave: new app name, icons and bundle identifier (dev.anuhas.keytypist). The GitHub repository is now DevAnuhas/keytypist; old links redirect.
+- KeyTypist is a new app to macOS. Install it manually, then grant Accessibility, Input Monitoring and (if you use it) Screen Recording again.
+- Nothing is migrated from KeyWeave. Settings, learned writing, downloaded models and sync data stay in KeyWeave's folders, and KeyTypist starts fresh with its own.
+- KeyWeave 2.4.0 and earlier cannot update to this release in place and keep reading their own frozen update feed. They will not be offered it and are not affected.
+- KeyTypist checks its own signed update feed daily. Installing an update always requires your action; turn scheduled checks off in About.
+
+Requires Apple Silicon and macOS 14 or later. Complete Cotypist Pro/Labs parity is unfinished.
+</description><sparkle:version>18</sparkle:version><sparkle:shortVersionString>2.5.0</sparkle:shortVersionString><sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion><sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements><enclosure url="https://github.com/DevAnuhas/keytypist/releases/download/v2.5.0/KeyTypist-2.5.0-arm64.dmg" length="21716118" type="application/octet-stream" sparkle:edSignature="JfzNX9AoCkCaNUwPz1sTFbL+Dc8ikG5rAtqk9tZWc9YKjascIaev/ZmPKDOX6YOLY8EscRkYrKgrQn7tYgNrBQ=="></enclosure></item></channel></rss><!-- sparkle-signatures:
+edSignature: bAGt69S+dhxNF4TqM1TRh43SwtHBp6X2v8BVu1dmEOjKEEYa5ULehpmPs0itJvfPuQ/r1PtGEKtZCtGqND5TAw==
+length: 2209
+-->
