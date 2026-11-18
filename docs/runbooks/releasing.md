@@ -12,6 +12,7 @@ Scripts/test.sh
 python3 Scripts/tests/test_app_preferences.py -v
 python3 Scripts/tests/test_release_packaging.py -v
 python3 Scripts/tests/test_appcast.py -v
+python3 Scripts/tests/test_dmg_background.py -v
 Scripts/setup-dmg.sh # Once, to provision the pinned dmgbuild tools.
 RELEASE=1 CONFIG=Release Scripts/build.sh app
 Scripts/notarize.sh app dist/KeyTypist.app
@@ -23,7 +24,7 @@ python3 Scripts/appcast.py --app dist/KeyTypist.app \
     --archive "dist/KeyTypist-$version-arm64.dmg" --notes /private/path/to/release-notes.md
 ```
 
-The app and DMG must each receive **Accepted**, be stapled and pass Gatekeeper. Packaging checks the mounted DMG and extracted ZIP against the accepted app, then writes `SHA256SUMS.txt`. The [dmgbuild layout](../../packaging/dmg/settings.py) and [hash-pinned dependencies](../../packaging/dmg/requirements.txt) own the installer recipe. Regenerate its background with `swift Scripts/make-dmg-background.swift packaging/dmg` after changing the source.
+The app and DMG must each receive **Accepted**, be stapled and pass Gatekeeper. Packaging checks the mounted DMG and extracted ZIP against the accepted app, then writes `SHA256SUMS.txt`. The [dmgbuild layout](../../packaging/dmg/settings.py) and [hash-pinned dependencies](../../packaging/dmg/requirements.txt) own the installer recipe. Regenerate its background with `swift Scripts/make-dmg-background.swift packaging/dmg` after changing the source. The background is a rendered image, so renaming the product in the script changes nothing until you do; `test_dmg_background.py` fails when the committed PNGs are stale.
 
 A notary timeout does not cancel the submission. Resume with the printed receipt using `Scripts/notarize.sh <app|dmg> <artifact> --resume <receipt>`; do not rebuild or resubmit it. If no submission ID was returned, inspect the receipt and account history before retrying. Packaging refuses to overwrite an existing DMG.
 
